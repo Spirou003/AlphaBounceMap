@@ -55,6 +55,41 @@ if (os.path.exists(Str+".txt")):
             elif (y > ymax):
                 ymax = y
         file.close()
+        file = open("coords.asteroides", mode)
+        asteroides = []
+        for line in file:
+            Line = line.strip().split(SEP)
+            (x, y) = (int(Line[0]),int(Line[1]))
+            asteroides.append((x, y))
+            if (x < xmin):
+                xmin = x
+            elif (x > xmax):
+                xmax = x
+            if (y < ymin):
+                ymin = y
+            elif (y > ymax):
+                ymax = y
+        file.close()
+        file.close()
+        file = open("coords.lastnettoyage", mode)
+        lastnettoyage = []
+        for line in file:
+            Line = ((line.strip())[1:-1]).split("] ... [")
+            (x1,y1) = Line[0].split(",")
+            (x2,y2) = Line[1].split("][")
+            (x1,x2,y1,y2) = (int(x1),int(x2),int(y1),int(y2))
+            for x in xrange(x1, x2+1):
+                for y in xrange(y1, y2+1):
+                    lastnettoyage.append((x, y))
+            if (x1 < xmin):
+                xmin = x1
+            elif (x2 > xmax):
+                xmax = x2
+            if (y1 < ymin):
+                ymin = y1
+            elif (y2 > ymax):
+                ymax = y2
+        file.close()
         xmin -= 5
         xmax += 5
         ymin -= 5
@@ -66,12 +101,22 @@ if (os.path.exists(Str+".txt")):
         for el in planets:
             (x, y) = el
             image.putpixel((x-xmin, y-ymin), (0,0,0))
+        for el in asteroides:
+            (x, y) = el
+            image.putpixel((x-xmin, y-ymin), (95,71,39))
+        for el in lastnettoyage:
+            (x, y) = el
+            image.putpixel((x-xmin, y-ymin), (0,128,0))
         for el in list:
             (x, y) = el
-            if (el in planets):
-                image.putpixel((x-xmin, y-ymin), (128,128,128))
-            else:
-                image.putpixel((x-xmin, y-ymin), (200,0,0))
+            color = (200,0,0)
+            if (el in lastnettoyage):
+                color = (0,255,0)
+            elif (el in planets):
+                color = (128,128,128)
+            elif (el in asteroides):
+                color = (191,142,78)
+            image.putpixel((x-xmin, y-ymin), color)
         image.save(Str+".png", "PNG")
     except Exception, e:
         traceback.print_exc()
