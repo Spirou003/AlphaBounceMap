@@ -1,11 +1,25 @@
-from PIL import Image, ImageColor
-import os
+import os, sys
 import traceback
+#from PIL import Image, ImageColor
+try:
+    from PIL import Image, ImageColor, ImageDraw
+except Exception, e:
+    Str = "python " + sys.argv[0]
+    if (len(sys.argv) >= 2):
+        Str = Str + " " + sys.argv[1]
+    os.system(Str)
+    exit(0)
 
 SEP = "."
+GRID = 10
 
 mode = "r"
-Str = raw_input("Entrez votre pseudo: ")
+Str = ""
+if (len(sys.argv) < 2):
+    #Str = raw_input("Entrez votre pseudo: ")
+    Str = "spirou003"
+else:
+    Str = sys.argv[1]
 if (os.path.exists(Str+".txt")):
     try:
         file = open(Str+".txt", mode)
@@ -74,6 +88,8 @@ if (os.path.exists(Str+".txt")):
         file = open("coords.lastnettoyage", mode)
         lastnettoyage = []
         for line in file:
+            if (len(line.strip()) == 0):
+                continue
             Line = ((line.strip())[1:-1]).split("] ... [")
             (x1,y1) = Line[0].split(",")
             (x2,y2) = Line[1].split("][")
@@ -95,15 +111,32 @@ if (os.path.exists(Str+".txt")):
         ymin -= 5
         ymax += 5
         image = Image.new("RGB", (xmax-xmin+1, ymax-ymin+1), "#0000aa")
-        for el in missiles:
-            (x, y) = el
-            image.putpixel((x-xmin, y-ymin), (255,255,255))
+        draw = ImageDraw.Draw(image)
+        i = 0
+        while (i < xmax):
+            draw.line([(i-xmin, 0), (i-xmin, ymax-ymin)], (100, 0, 170))
+            i += GRID
+        i = -GRID
+        while (i > xmin):
+            draw.line([(i-xmin, 0), (i-xmin, ymax-ymin)], (100, 0, 170))
+            i -= GRID
+        i = 0
+        while (i < ymax):
+            draw.line([(0, i-ymin), (xmax-xmin, i-ymin)], (100, 0, 170))
+            i += GRID
+        i = -GRID
+        while (i > ymin):
+            draw.line([(0, i-ymin), (xmax-xmin, i-ymin)], (100, 0, 170))
+            i -= GRID
         for el in planets:
             (x, y) = el
             image.putpixel((x-xmin, y-ymin), (0,0,0))
         for el in asteroides:
             (x, y) = el
             image.putpixel((x-xmin, y-ymin), (95,71,39))
+        for el in missiles:
+            (x, y) = el
+            image.putpixel((x-xmin, y-ymin), (255,255,255))
         for el in lastnettoyage:
             (x, y) = el
             image.putpixel((x-xmin, y-ymin), (0,128,0))
@@ -117,6 +150,7 @@ if (os.path.exists(Str+".txt")):
             elif (el in asteroides):
                 color = (191,142,78)
             image.putpixel((x-xmin, y-ymin), color)
+        del draw
         image.save(Str+".png", "PNG")
     except Exception, e:
         traceback.print_exc()

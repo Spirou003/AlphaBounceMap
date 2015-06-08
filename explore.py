@@ -11,7 +11,8 @@ def search(x, y, list):
     return None
 
 mode = "r+"
-Str = raw_input("Entrez votre pseudo: ")+".txt"
+#Str = raw_input("Entrez votre pseudo: ")+".txt"
+Str = "spirou003"+".txt"
 if (not os.path.exists(Str)):
     mode = "w+"
 try:
@@ -43,6 +44,8 @@ try:
                     else:
                         if (search(x, y, list) == None):
                             list.append((x, y))
+                        else:
+                            raise Exception()
                         list.sort()
                 except Exception, e:
                     if (b):

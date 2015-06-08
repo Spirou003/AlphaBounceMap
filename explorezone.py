@@ -49,6 +49,8 @@ try:
                             else:
                                 if (search(x, y, list) == None):
                                     list.append((x, y))
+                                else:
+                                    raise Exception()
                         except Exception, e:
                             if (b):
                                 print "("+str(x)+" "+str(y)+") n'est pas encore explore"
