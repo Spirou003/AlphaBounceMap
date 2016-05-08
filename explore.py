@@ -53,7 +53,11 @@ try:
                     else:
                         print "("+str(x)+" "+str(y)+") est deja explore"
             except Exception, e:
-                pass
+                if ("save" in Str.lower()):
+                    file = open(filename, "w+")
+                    for el in list:
+                        file.write(str(el[0])+SEP+str(el[1])+"\n")
+                    file.close()
     except KeyboardInterrupt, e:
         file = open(filename, "w+")
         for el in list:
