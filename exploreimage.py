@@ -1,5 +1,6 @@
 import os, sys
 import traceback
+import util
 #from PIL import Image, ImageColor
 try:
     from PIL import Image, ImageColor, ImageDraw
@@ -22,12 +23,7 @@ else:
     Str = sys.argv[1]
 if (os.path.exists(Str+".txt")):
     try:
-        file = open(Str+".txt", mode)
-        list = []
-        for line in file:
-            Line = line.strip().split(SEP)
-            list.append((int(Line[0]),int(Line[1])))
-        file.close()
+        list = util.load(Str+".txt")
         (xmin, xmax, ymin, ymax) = (list[0][0], list[0][0], list[0][1], list[0][1])
         for el in list:
             (x, y) = el
