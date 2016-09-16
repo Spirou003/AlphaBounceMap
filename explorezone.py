@@ -1,10 +1,10 @@
 import os
-import util
+import core
 
 Str = raw_input("Entrez votre pseudo: ")+".txt"
 try:
     filename = Str
-    list = util.load(filename)
+    list = core.load(filename)
     Str = ""
     print 'Pour desexplorer, tapez "d" devant les coordonnees "x1 y1 x2 y2"'
     try:
@@ -26,18 +26,18 @@ try:
                     for y in xrange(y1, y2+1):
                         try:
                             if (b):
-                                util.remove(list, x, y)
+                                core.remove(list, x, y)
                             else:
-                                util.add(list, x, y)
+                                core.add(list, x, y)
                         except ValueError, e:
                             print e
                         except Exception, e:
                             print "une erreur est survenue: "+str(e)
             except Exception, e:
                 if ("save" in Str.lower()):
-                    util.save(filename, list, None)
+                    core.save(filename, list, None)
     except KeyboardInterrupt, e:
-        util.save(filename, list, None)
+        core.save(filename, list, None)
     except Exception, e:
         print e
 except Exception, e:

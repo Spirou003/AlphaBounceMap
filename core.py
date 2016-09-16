@@ -1,29 +1,66 @@
-import os, sys
+import os
 import traceback
-import util
-#from PIL import Image, ImageColor
-try:
-    from PIL import Image, ImageColor, ImageDraw
-except Exception, e:
-    Str = "python " + sys.argv[0]
-    if (len(sys.argv) >= 2):
-        Str = Str + " " + sys.argv[1]
-    os.system(Str)
-    exit(0)
+from PIL import Image, ImageColor, ImageDraw
 
 SEP = "."
-GRID = 10
 
-mode = "r"
-Str = ""
-if (len(sys.argv) < 2):
-    #Str = raw_input("Entrez votre pseudo: ")
-    Str = "spirou003"
-else:
-    Str = sys.argv[1]
-if (os.path.exists(Str+".txt")):
+def search(x, y, list):
+    i = 0
+    for el in list:
+        if (el[0] == x and el[1] == y):
+            return i
+        i += 1
+    return None
+#
+def add(list, x, y):
+    if (search(x, y, list) == None):
+        list.append((x, y))
+        list.sort()
+    else:
+        raise ValueError("("+str(x)+" "+str(y)+") est deja explore")
+#
+def remove(list, x, y):
+    index = search(x, y, list)
+    if (index == None):
+        raise ValueError("("+str(x)+" "+str(y)+") n'est pas encore explore")
+    list.pop(index)
+#
+def save(filename, list, lastentered):
+    file = open(filename, "w+")
+    #file.write(lastentered+"\n")
+    for el in list:
+        file.write(str(el[0])+SEP+str(el[1])+"\n")
+    file.close()
+#
+def load(filename):
+    mode = "r+"
+    if (not os.path.exists(filename)):
+        mode = "w+"
+    file = open(filename, mode)
+    list = []
+    for line in file:
+        Line = line.strip().split(SEP)
+        list.append((int(Line[0]),int(Line[1])))
+    list.sort()
+    file.close()
+    return list
+#
+def loadWords(filename):
+    file = open(filename, "r")
+    words = []
+    for line in file:
+        words.append(line.strip())
+    return words
+#
+def oneIn(list, string):
+    for name in list:
+        if name in string:
+            return True
+    return False
+#
+def makeMap(playername, list):
+    GRID = 10
     try:
-        list = util.load(Str+".txt")
         (xmin, xmax, ymin, ymax) = (list[0][0], list[0][0], list[0][1], list[0][1])
         for el in list:
             (x, y) = el
@@ -35,7 +72,7 @@ if (os.path.exists(Str+".txt")):
                 ymin = y
             elif (y > ymax):
                 ymax = y
-        file = open("coords.missiles", mode)
+        file = open("coords.missiles", "r")
         missiles = []
         for line in file:
             Line = line.strip().split(SEP)
@@ -50,7 +87,7 @@ if (os.path.exists(Str+".txt")):
             elif (y > ymax):
                 ymax = y
         file.close()
-        file = open("coords.planets", mode)
+        file = open("coords.planets", "r")
         planets = []
         for line in file:
             Line = line.strip().split(SEP)
@@ -65,7 +102,7 @@ if (os.path.exists(Str+".txt")):
             elif (y > ymax):
                 ymax = y
         file.close()
-        file = open("coords.asteroides", mode)
+        file = open("coords.asteroides", "r")
         asteroides = []
         for line in file:
             Line = line.strip().split(SEP)
@@ -81,7 +118,7 @@ if (os.path.exists(Str+".txt")):
                 ymax = y
         file.close()
         file.close()
-        file = open("coords.lastnettoyage", mode)
+        file = open("coords.lastnettoyage", "r")
         lastnettoyage = []
         for line in file:
             if (len(line.strip()) == 0):
@@ -147,6 +184,7 @@ if (os.path.exists(Str+".txt")):
                 color = (191,142,78)
             image.putpixel((x-xmin, y-ymin), color)
         del draw
-        image.save(Str+".png", "PNG")
+        image.save(playername+".png", "PNG")
     except Exception, e:
         traceback.print_exc()
+#
