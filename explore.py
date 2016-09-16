@@ -6,8 +6,11 @@ mapwords = core.loadWords("words_map.txt")
 savewords = core.loadWords("words_save.txt")
 exitwords = core.loadWords("words_exit.txt")
 
-#playername = raw_input("Entrez votre pseudo: ")
-playername = "spirou003"
+playername = ""
+if (len(sys.argv) < 2):
+    playername = raw_input("Entrez votre pseudo: ")
+else:
+    playername = sys.argv[1]
 Str = playername+".txt"
 try:
     filename = Str
