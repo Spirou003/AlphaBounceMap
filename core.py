@@ -49,7 +49,8 @@ def loadWords(filename):
     file = open(filename, "r")
     words = []
     for line in file:
-        words.append(line.strip())
+        words.append(line.strip().lower())
+    file.close()
     return words
 #
 def oneIn(list, string):
