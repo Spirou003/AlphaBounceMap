@@ -4,6 +4,11 @@ from PIL import Image, ImageColor, ImageDraw
 
 SEP = "."
 
+def removefromlist(list, toremove):
+    for el in toremove:
+        if (el in list):
+            list.remove(el)
+#
 def search(x, y, list):
     i = 0
     for el in list:
@@ -46,12 +51,28 @@ def load(filename):
     return list
 #
 def loadWords(filename):
+    try:
+        file = open(filename, "r")
+        words = []
+        for line in file:
+            words.append(line.strip().lower())
+        file.close()
+        return words
+    except Exception, e:
+        return []
+#
+def loadPlanets(filename, planets):
     file = open(filename, "r")
-    words = []
+    planetname = ""
     for line in file:
-        words.append(line.strip().lower())
+        try:
+            Line = line.strip().split(SEP)
+            (x, y) = (int(Line[0]),int(Line[1]))
+            planets[name].append((x, y))
+        except ValueError, e:
+            name = line.strip()
     file.close()
-    return words
+    return planets
 #
 def oneIn(list, string):
     for name in list:
@@ -59,7 +80,7 @@ def oneIn(list, string):
             return True
     return False
 #
-def makeMap(playername, list):
+def makeMap(playername, list, planets):
     GRID = 10
     try:
         (xmin, xmax, ymin, ymax) = (list[0][0], list[0][0], list[0][1], list[0][1])
@@ -88,20 +109,19 @@ def makeMap(playername, list):
             elif (y > ymax):
                 ymax = y
         file.close()
-        file = open("coords.planets", "r")
-        planets = []
-        for line in file:
-            Line = line.strip().split(SEP)
-            (x, y) = (int(Line[0]),int(Line[1]))
-            planets.append((x, y))
-            if (x < xmin):
-                xmin = x
-            elif (x > xmax):
-                xmax = x
-            if (y < ymin):
-                ymin = y
-            elif (y > ymax):
-                ymax = y
+        planetscoords = []
+        for planetname in planets:
+            for coords in planets[planetname]:
+                (x, y) = coords
+                planetscoords.append((x, y))
+                if (x < xmin):
+                    xmin = x
+                elif (x > xmax):
+                    xmax = x
+                if (y < ymin):
+                    ymin = y
+                elif (y > ymax):
+                    ymax = y
         file.close()
         file = open("coords.asteroides", "r")
         asteroides = []
@@ -162,7 +182,7 @@ def makeMap(playername, list):
         while (i > ymin):
             draw.line([(0, i-ymin), (xmax-xmin, i-ymin)], (100, 0, 170))
             i -= GRID
-        for el in planets:
+        for el in planetscoords:
             (x, y) = el
             image.putpixel((x-xmin, y-ymin), (0,0,0))
         for el in asteroides:
@@ -179,7 +199,7 @@ def makeMap(playername, list):
             color = (200,0,0)
             if (el in lastnettoyage):
                 color = (0,255,0)
-            elif (el in planets):
+            elif (el in planetscoords):
                 color = (128,128,128)
             elif (el in asteroides):
                 color = (191,142,78)

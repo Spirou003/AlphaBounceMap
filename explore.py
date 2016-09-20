@@ -5,7 +5,25 @@ import core
 mapwords = core.loadWords("words_map.txt")
 savewords = core.loadWords("words_save.txt")
 exitwords = core.loadWords("words_exit.txt")
+planet_names = core.loadWords("planets.names")
+planets = {}
+for planetname in planet_names:
+    planets[planetname] = []
+planets_loaded = False
+reservedwords = ["zone", "d", "help"] + planet_names
 
+core.removefromlist(mapwords, reservedwords)
+core.removefromlist(savewords, reservedwords)
+core.removefromlist(exitwords, reservedwords)
+
+if (len(mapwords) == 0):
+    mapwords.append("map")
+if (len(savewords) == 0):
+    savewords.append("save")
+if (len(exitwords) == 0):
+    exitwords.append("exit")
+    exitwords.append("quit")
+#
 playername = ""
 if (len(sys.argv) < 2):
     playername = raw_input("Entrez votre pseudo: ")
@@ -16,14 +34,15 @@ Str = playername+".txt"
 filename = Str
 list = core.load(filename)
 Str = ""
+Strlist = []
 print 'Tapez "help" pour obtenir de l\'aide'
 b = False
 try:
-    while (not core.oneIn(exitwords, Str)):
+    while (not core.oneIn(exitwords, Strlist)):
         Str = raw_input("> ")
         Strlist = Str.strip().lower().split(" ")
         try:
-            if (core.oneIn(Strlist, "help")):
+            if ("help" in Strlist):
                 if (len(Strlist) == 1):
                     print 'Tapez "x y" pour marquer le secteur aux coordonnees (x, y) exploree.'
                     print 'Tapez "zone x1 y1 x2 y2" pour marquer comme explore chaque secteur situe dans le rectangle decrit par les coordonnees (x1, y1) et (x2, y2).'
@@ -34,50 +53,79 @@ try:
                     print 'Valeurs possibles de "commandname" pour sauvegarder les donnees: '+str(savewords)
                 else:
                     pass
-            elif (core.oneIn(mapwords, Str)):
-                core.makeMap(playername, list)
-            elif (core.oneIn(savewords, Str)):
+            elif (core.oneIn(mapwords, Strlist)):
+                if (not planets_loaded):
+                    core.loadPlanets("coords.planets", planets)
+                    planets_loaded = True
+                core.makeMap(playername, list, planets)
+            elif (core.oneIn(savewords, Strlist)):
                 core.save(filename, list, None)
-            elif (core.oneIn(exitwords, Str)):
+            elif (core.oneIn(exitwords, Strlist)):
                 pass #nothing to do
-            else:
-                if (core.oneIn(Strlist, "zone")):
-                    Strlist.remove("zone")
-                    b = ('d' in Strlist)
-                    if (b):
-                        Strlist.remove("d")
-                    (x1, y1, x2, y2) = Strlist
-                    x1 = int(x1)
-                    y1 = int(y1)
-                    x2 = int(x2)
-                    y2 = int(y2)
-                    (x1, x2) = (min(x1, x2), max(x1, x2))
-                    (y1, y2) = (min(y1, y2), max(y1, y2))
-                    for x in xrange(x1, x2+1):
-                        for y in xrange(y1, y2+1):
-                            try:
-                                if (b):
-                                    core.remove(list, x, y)
-                                else:
-                                    core.add(list, x, y)
-                            except ValueError, e:
-                                print e
-                            except Exception, e:
-                                traceback.print_exc()
-                else:
-                    b = ('d' in Strlist)
-                    if (b):
-                        Strlist.remove("d")
-                    (x, y) = Strlist
-                    x = int(x)
-                    y = int(y)
-                    try:
-                        if (b):
+            elif ("zone" in Strlist):
+                Strlist.remove("zone")
+                b = ('d' in Strlist)
+                if (b):
+                    Strlist.remove("d")
+                (x1, y1, x2, y2) = Strlist
+                x1 = int(x1)
+                y1 = int(y1)
+                x2 = int(x2)
+                y2 = int(y2)
+                (x1, x2) = (min(x1, x2), max(x1, x2))
+                (y1, y2) = (min(y1, y2), max(y1, y2))
+                for x in xrange(x1, x2+1):
+                    for y in xrange(y1, y2+1):
+                        try:
+                            if (b):
+                                core.remove(list, x, y)
+                            else:
+                                core.add(list, x, y)
+                        except ValueError, e:
+                            print e
+                        except Exception, e:
+                            traceback.print_exc()
+            elif (core.oneIn(planet_names, Strlist)):
+                if (not planets_loaded):
+                    core.loadPlanets("coords.planets", planets)
+                    planets_loaded = True
+                name = ""
+                for planetname in planet_names:
+                    if (planetname in Strlist):
+                        name = planetname
+                        break
+                if (name == ""):
+                    raise ValueError("unknown error")
+                if ("d" in Strlist):
+                    for (x, y) in planets[name]:
+                        try:
                             core.remove(list, x, y)
-                        else:
+                        except ValueError, e:
+                            print e
+                        except Exception, e:
+                            traceback.print_exc()
+                else:
+                    for (x, y) in planets[name]:
+                        try:
                             core.add(list, x, y)
-                    except ValueError, e:
-                        print e
+                        except ValueError, e:
+                            print e
+                        except Exception, e:
+                            traceback.print_exc()
+            else:
+                b = ('d' in Strlist)
+                if (b):
+                    Strlist.remove("d")
+                (x, y) = Strlist
+                x = int(x)
+                y = int(y)
+                try:
+                    if (b):
+                        core.remove(list, x, y)
+                    else:
+                        core.add(list, x, y)
+                except ValueError, e:
+                    print e
         except Exception, e:
             traceback.print_exc()
 except KeyboardInterrupt, e:
