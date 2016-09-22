@@ -2,10 +2,12 @@ import os, sys
 import traceback
 import core
 
-mapwords = core.loadWords("words_map.txt")
-savewords = core.loadWords("words_save.txt")
-exitwords = core.loadWords("words_exit.txt")
-planet_names = core.loadWords("planets.names")
+datadir = core.datadir
+
+mapwords = core.loadWords(datadir+"words_map.txt")
+savewords = core.loadWords(datadir+"words_save.txt")
+exitwords = core.loadWords(datadir+"words_exit.txt")
+planet_names = core.loadWords(datadir+"planet_names.txt")
 planets = {}
 for planetname in planet_names:
     planets[planetname] = []
@@ -39,23 +41,34 @@ print 'Tapez "help" pour obtenir de l\'aide'
 b = False
 try:
     while (not core.oneIn(exitwords, Strlist)):
-        Str = raw_input("> ")
-        Strlist = Str.strip().lower().split(" ")
+        Str = raw_input("> ").strip().lower()
+        Strlist = Str.split(" ")
         try:
             if ("help" in Strlist):
                 if (len(Strlist) == 1):
                     print 'Tapez "x y" pour marquer le secteur aux coordonnees (x, y) exploree.'
                     print 'Tapez "zone x1 y1 x2 y2" pour marquer comme explore chaque secteur situe dans le rectangle decrit par les coordonnees (x1, y1) et (x2, y2).'
+                    print 'Entrez le nom d\'une planete pour marquer chacun de ses secteurs comme explore. Exception pour la Terre.'
+                    print 'Liste des planetes: '+str(planet_names)
                     print 'Dans les commandes precedentes, l\'option "d" a pour effet de marquer comme non explore.'
                     print "Pour quitter ce script, entrez l'un des mots suivants: "+str(exitwords)
                     print 'Pour les autres commandes, tapez "help commandname" pour obtenir des informations supplementaires.'
                     print 'Valeurs possibles de "commandname" pour generer la carte: '+str(mapwords)
                     print 'Valeurs possibles de "commandname" pour sauvegarder les donnees: '+str(savewords)
                 else:
-                    pass
+                    if (core.oneIn(mapwords, Strlist)):
+                        print "Coming soon"
+                    elif (core.oneIn(savewords, Strlist)):
+                        print "Coming soon"
+                    elif (core.oneIn(planet_names, Strlist)):
+                        print "Coming soon"
+                    else:
+                        Strlist.remove("help")
+                        tempstring = " ".join(Strlist)
+                        print 'Aucune commande du nom de "'+tempstring+'"'
             elif (core.oneIn(mapwords, Strlist)):
                 if (not planets_loaded):
-                    core.loadPlanets("coords.planets", planets)
+                    core.loadPlanets(datadir+"coords_planets.txt", planets)
                     planets_loaded = True
                 core.makeMap(playername, list, planets)
             elif (core.oneIn(savewords, Strlist)):
@@ -87,7 +100,7 @@ try:
                             traceback.print_exc()
             elif (core.oneIn(planet_names, Strlist)):
                 if (not planets_loaded):
-                    core.loadPlanets("coords.planets", planets)
+                    core.loadPlanets(datadir+"coords_planets.txt", planets)
                     planets_loaded = True
                 name = ""
                 for planetname in planet_names:

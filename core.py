@@ -3,6 +3,7 @@ import traceback
 from PIL import Image, ImageColor, ImageDraw
 
 SEP = "."
+datadir = "data"+os.sep
 
 def removefromlist(list, toremove):
     for el in toremove:
@@ -94,7 +95,7 @@ def makeMap(playername, list, planets):
                 ymin = y
             elif (y > ymax):
                 ymax = y
-        file = open("coords.missiles", "r")
+        file = open(datadir+"coords_missiles.txt", "r")
         missiles = []
         for line in file:
             Line = line.strip().split(SEP)
@@ -123,7 +124,7 @@ def makeMap(playername, list, planets):
                 elif (y > ymax):
                     ymax = y
         file.close()
-        file = open("coords.asteroides", "r")
+        file = open(datadir+"coords_asteroides.txt", "r")
         asteroides = []
         for line in file:
             Line = line.strip().split(SEP)
@@ -139,7 +140,7 @@ def makeMap(playername, list, planets):
                 ymax = y
         file.close()
         file.close()
-        file = open("coords.lastnettoyage", "r")
+        file = open(datadir+"coords_lastnettoyage.txt", "r")
         lastnettoyage = []
         for line in file:
             if (len(line.strip()) == 0):
