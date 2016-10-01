@@ -6,6 +6,7 @@ datadir = core.datadir
 
 mapwords = core.loadWords(datadir+"words_map.txt")
 savewords = core.loadWords(datadir+"words_save.txt")
+viewwords = core.loadWords(datadir+"words_view.txt")
 exitwords = core.loadWords(datadir+"words_exit.txt")
 planet_names = core.loadWords(datadir+"planet_names.txt")
 planets = {}
@@ -73,6 +74,8 @@ try:
                 core.makeMap(playername, list, planets)
             elif (core.oneIn(savewords, Strlist)):
                 core.save(filename, list, None)
+            elif (core.oneIn(viewwords, Strlist)):
+                os.system(core.getMapFilename(playername))
             elif (core.oneIn(exitwords, Strlist)):
                 pass #nothing to do
             elif ("zone" in Strlist):

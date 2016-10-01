@@ -81,6 +81,9 @@ def oneIn(list, string):
             return True
     return False
 #
+def getMapFilename(playername):
+    return playername+".png"
+#
 def makeMap(playername, list, planets):
     GRID = 10
     try:
@@ -206,7 +209,7 @@ def makeMap(playername, list, planets):
                 color = (191,142,78)
             image.putpixel((x-xmin, y-ymin), color)
         del draw
-        image.save(playername+".png", "PNG")
+        image.save(getMapFilename(playername), "PNG")
     except Exception, e:
         traceback.print_exc()
 #
