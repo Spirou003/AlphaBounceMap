@@ -1,6 +1,4 @@
 *.png
-*.php*
-*.cqr
-*.txt
+/*.txt
 *.pyc
-aster
+*.bat
