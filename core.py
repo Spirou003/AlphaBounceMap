@@ -91,48 +91,38 @@ def oneIn(list, string):
 def getMapFilename(playername):
     return prefix(playername)+".png"
 #
+def gridlimits(xmin, xmax, ymin, ymax, x, y):
+    if (x < xmin):
+        xmin = x
+    elif (x > xmax):
+        xmax = x
+    if (y < ymin):
+        ymin = y
+    elif (y > ymax):
+        ymax = y
+    return (xmin, xmax, ymin, ymax)
+#
 def makeMap(playername, list, planets):
     GRID = 10
     try:
         (xmin, xmax, ymin, ymax) = (list[0][0], list[0][0], list[0][1], list[0][1])
         for el in list:
             (x, y) = el
-            if (x < xmin):
-                xmin = x
-            elif (x > xmax):
-                xmax = x
-            if (y < ymin):
-                ymin = y
-            elif (y > ymax):
-                ymax = y
+            (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
         file = open(datadir+"coords_missiles.txt", "r")
         missiles = []
         for line in file:
             Line = line.strip().split(SEP)
             (x, y) = (int(Line[0]),int(Line[1]))
             missiles.append((x, y))
-            if (x < xmin):
-                xmin = x
-            elif (x > xmax):
-                xmax = x
-            if (y < ymin):
-                ymin = y
-            elif (y > ymax):
-                ymax = y
+            (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
         file.close()
         planetscoords = []
         for planetname in planets:
             for coords in planets[planetname]:
                 (x, y) = coords
                 planetscoords.append((x, y))
-                if (x < xmin):
-                    xmin = x
-                elif (x > xmax):
-                    xmax = x
-                if (y < ymin):
-                    ymin = y
-                elif (y > ymax):
-                    ymax = y
+                (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
         file.close()
         file = open(datadir+"coords_asteroides.txt", "r")
         asteroides = []
@@ -140,14 +130,7 @@ def makeMap(playername, list, planets):
             Line = line.strip().split(SEP)
             (x, y) = (int(Line[0]),int(Line[1]))
             asteroides.append((x, y))
-            if (x < xmin):
-                xmin = x
-            elif (x > xmax):
-                xmax = x
-            if (y < ymin):
-                ymin = y
-            elif (y > ymax):
-                ymax = y
+            (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
         file.close()
         lastnettoyage = []
         if (os.path.isfile(prefix(playername)+".lastnettoyage.txt")):
@@ -178,14 +161,7 @@ def makeMap(playername, list, planets):
                 Line = line.strip().split(SEP)
                 (x, y) = (int(Line[0]),int(Line[1]))
                 objectifs.append((x, y))
-                if (x < xmin):
-                    xmin = x
-                elif (x > xmax):
-                    xmax = x
-                if (y < ymin):
-                    ymin = y
-                elif (y > ymax):
-                    ymax = y
+                (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
             file.close()
         xmin -= 5
         xmax += 5
