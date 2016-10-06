@@ -102,6 +102,17 @@ def gridlimits(xmin, xmax, ymin, ymax, x, y):
         ymax = y
     return (xmin, xmax, ymin, ymax)
 #
+def readcoordsfilewlimits(filename, xmin, xmax, ymin, ymax):
+    file = open(filename, "r")
+    list = []
+    for line in file:
+        Line = line.strip().split(SEP)
+        (x, y) = (int(Line[0]),int(Line[1]))
+        list.append((x, y))
+        (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
+    file.close()
+    return (list, xmin, xmax, ymin, ymax)
+#
 def makeMap(playername, list, planets):
     GRID = 10
     try:
@@ -109,29 +120,14 @@ def makeMap(playername, list, planets):
         for el in list:
             (x, y) = el
             (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
-        file = open(datadir+"coords_missiles.txt", "r")
-        missiles = []
-        for line in file:
-            Line = line.strip().split(SEP)
-            (x, y) = (int(Line[0]),int(Line[1]))
-            missiles.append((x, y))
-            (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
-        file.close()
         planetscoords = []
         for planetname in planets:
             for coords in planets[planetname]:
                 (x, y) = coords
                 planetscoords.append((x, y))
                 (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
-        file.close()
-        file = open(datadir+"coords_asteroides.txt", "r")
-        asteroides = []
-        for line in file:
-            Line = line.strip().split(SEP)
-            (x, y) = (int(Line[0]),int(Line[1]))
-            asteroides.append((x, y))
-            (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
-        file.close()
+        (missiles, xmin, xmax, ymin, ymax) = readcoordsfilewlimits(datadir+"coords_missiles.txt", xmin, xmax, ymin, ymax)
+        (asteroides, xmin, xmax, ymin, ymax) = readcoordsfilewlimits(datadir+"coords_asteroides.txt", xmin, xmax, ymin, ymax)
         lastnettoyage = []
         if (os.path.isfile(prefix(playername)+".lastnettoyage.txt")):
             file = open(prefix(playername)+".lastnettoyage.txt", "r")
@@ -156,13 +152,7 @@ def makeMap(playername, list, planets):
             file.close()
         objectifs = []
         if (os.path.isfile(prefix(playername)+".objectifs.txt")):
-            file = open(prefix(playername)+".objectifs.txt", "r")
-            for line in file:
-                Line = line.strip().split(SEP)
-                (x, y) = (int(Line[0]),int(Line[1]))
-                objectifs.append((x, y))
-                (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
-            file.close()
+            (objectifs, xmin, xmax, ymin, ymax) = readcoordsfilewlimits(prefix(playername)+".objectifs.txt", xmin, xmax, ymin, ymax)
         xmin -= 5
         xmax += 5
         ymin -= 5
@@ -185,21 +175,15 @@ def makeMap(playername, list, planets):
         while (i > ymin):
             draw.line([(0, i-ymin), (xmax-xmin, i-ymin)], (100, 0, 170))
             i -= GRID
-        for el in planetscoords:
-            (x, y) = el
-            image.putpixel((x-xmin, y-ymin), (0,0,0))
-        for el in asteroides:
-            (x, y) = el
-            image.putpixel((x-xmin, y-ymin), (95,71,39))
-        for el in missiles:
-            (x, y) = el
-            image.putpixel((x-xmin, y-ymin), (255,255,255))
-        for el in lastnettoyage:
-            (x, y) = el
-            image.putpixel((x-xmin, y-ymin), (0,128,0))
-        for el in objectifs:
-            (x, y) = el
-            image.putpixel((x-xmin, y-ymin), (0,128,0))
+        def drawlist(list, image, xmin, xmax, ymin, ymax, color):
+            for el in list:
+                (x, y) = el
+                image.putpixel((x-xmin, y-ymin), color)
+        drawlist(planetscoords, image, xmin, xmax, ymin, ymax, (0,0,0))
+        drawlist(asteroides, image, xmin, xmax, ymin, ymax, (95,71,39))
+        drawlist(missiles, image, xmin, xmax, ymin, ymax, (255,255,255))
+        drawlist(lastnettoyage, image, xmin, xmax, ymin, ymax, (0,128,0))
+        drawlist(objectifs, image, xmin, xmax, ymin, ymax, (0,128,0))
         for el in list:
             (x, y) = el
             color = (200,0,0)
