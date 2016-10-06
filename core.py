@@ -5,6 +5,9 @@ from PIL import Image, ImageColor, ImageDraw
 SEP = "."
 datadir = "data"+os.sep
 
+if (not os.path.isdir("saves")):
+    os.mkdir("saves")
+
 def removefromlist(list, toremove):
     for el in toremove:
         if (el in list):
@@ -31,14 +34,18 @@ def remove(list, x, y):
         raise ValueError("("+str(x)+" "+str(y)+") n'est pas encore explore")
     list.pop(index)
 #
-def save(filename, list, lastentered):
+def save(playername, list, lastentered):
+    filename = prefix(playername)+".txt"
     file = open(filename, "w+")
-    #file.write(lastentered+"\n")
     for el in list:
         file.write(str(el[0])+SEP+str(el[1])+"\n")
     file.close()
 #
-def load(filename):
+def prefix(playername):
+    return "saves"+os.sep+playername
+#
+def load(playername):
+    filename = prefix(playername)+".txt"
     mode = "r+"
     if (not os.path.exists(filename)):
         mode = "w+"
@@ -82,7 +89,7 @@ def oneIn(list, string):
     return False
 #
 def getMapFilename(playername):
-    return playername+".png"
+    return prefix(playername)+".png"
 #
 def makeMap(playername, list, planets):
     GRID = 10
@@ -142,28 +149,44 @@ def makeMap(playername, list, planets):
             elif (y > ymax):
                 ymax = y
         file.close()
-        file.close()
-        file = open(datadir+"coords_lastnettoyage.txt", "r")
         lastnettoyage = []
-        for line in file:
-            if (len(line.strip()) == 0):
-                continue
-            Line = ((line.strip())[1:-1]).split("] ... [")
-            (x1,y1) = Line[0].split(",")
-            (x2,y2) = Line[1].split("][")
-            (x1,x2,y1,y2) = (int(x1),int(x2),int(y1),int(y2))
-            for x in xrange(x1, x2+1):
-                for y in xrange(y1, y2+1):
-                    lastnettoyage.append((x, y))
-            if (x1 < xmin):
-                xmin = x1
-            elif (x2 > xmax):
-                xmax = x2
-            if (y1 < ymin):
-                ymin = y1
-            elif (y2 > ymax):
-                ymax = y2
-        file.close()
+        if (os.path.isfile(prefix(playername)+".lastnettoyage.txt")):
+            file = open(prefix(playername)+".lastnettoyage.txt", "r")
+            for line in file:
+                if (len(line.strip()) == 0):
+                    continue
+                Line = ((line.strip())[1:-1]).split("] ... [")
+                (x1,y1) = Line[0].split(",")
+                (x2,y2) = Line[1].split("][")
+                (x1,x2,y1,y2) = (int(x1),int(x2),int(y1),int(y2))
+                for x in xrange(x1, x2+1):
+                    for y in xrange(y1, y2+1):
+                        lastnettoyage.append((x, y))
+                if (x1 < xmin):
+                    xmin = x1
+                elif (x2 > xmax):
+                    xmax = x2
+                if (y1 < ymin):
+                    ymin = y1
+                elif (y2 > ymax):
+                    ymax = y2
+            file.close()
+        objectifs = []
+        if (os.path.isfile(prefix(playername)+".objectifs.txt")):
+            file = open(prefix(playername)+".objectifs.txt", "r")
+            for line in file:
+                Line = line.strip().split(SEP)
+                (x, y) = (int(Line[0]),int(Line[1]))
+                objectifs.append((x, y))
+                if (x < xmin):
+                    xmin = x
+                elif (x > xmax):
+                    xmax = x
+                if (y < ymin):
+                    ymin = y
+                elif (y > ymax):
+                    ymax = y
+            file.close()
         xmin -= 5
         xmax += 5
         ymin -= 5
@@ -198,10 +221,13 @@ def makeMap(playername, list, planets):
         for el in lastnettoyage:
             (x, y) = el
             image.putpixel((x-xmin, y-ymin), (0,128,0))
+        for el in objectifs:
+            (x, y) = el
+            image.putpixel((x-xmin, y-ymin), (0,128,0))
         for el in list:
             (x, y) = el
             color = (200,0,0)
-            if (el in lastnettoyage):
+            if (el in lastnettoyage or el in objectifs):
                 color = (0,255,0)
             elif (el in planetscoords):
                 color = (128,128,128)

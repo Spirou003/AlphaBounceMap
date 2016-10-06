@@ -32,10 +32,8 @@ if (len(sys.argv) < 2):
     playername = raw_input("Entrez votre pseudo: ")
 else:
     playername = sys.argv[1]
-Str = playername+".txt"
-
-filename = Str
-list = core.load(filename)
+#
+list = core.load(playername)
 Str = ""
 Strlist = []
 print 'Tapez "help" pour obtenir de l\'aide'
@@ -73,7 +71,7 @@ try:
                     planets_loaded = True
                 core.makeMap(playername, list, planets)
             elif (core.oneIn(savewords, Strlist)):
-                core.save(filename, list, None)
+                core.save(playername, list, None)
             elif (core.oneIn(viewwords, Strlist)):
                 os.system(core.getMapFilename(playername))
             elif (core.oneIn(exitwords, Strlist)):
