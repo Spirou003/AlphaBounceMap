@@ -7,7 +7,10 @@ datadir = "data"+os.sep
 
 if (not os.path.isdir("saves")):
     os.mkdir("saves")
-
+#
+def isforbidden(pseudo):
+    return (not pseudo.isalnum())
+#
 def removefromlist(list, toremove):
     for el in toremove:
         if (el in list):

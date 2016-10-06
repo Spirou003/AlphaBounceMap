@@ -8,6 +8,7 @@ mapwords = core.loadWords(datadir+"words_map.txt")
 savewords = core.loadWords(datadir+"words_save.txt")
 viewwords = core.loadWords(datadir+"words_view.txt")
 exitwords = core.loadWords(datadir+"words_exit.txt")
+exitwords_reserved = ("quit", "exit")
 planet_names = core.loadWords(datadir+"planet_names.txt")
 planets = {}
 for planetname in planet_names:
@@ -23,16 +24,24 @@ if (len(mapwords) == 0):
     mapwords.append("map")
 if (len(savewords) == 0):
     savewords.append("save")
-if (len(exitwords) == 0):
-    exitwords.append("exit")
-    exitwords.append("quit")
+for exit_word in exitwords_reserved:
+    if (not exit_word in exitwords):
+        exitwords.append(exit_word)
 #
 playername = ""
-if (len(sys.argv) < 2):
-    playername = raw_input("Entrez votre pseudo: ")
+if (len(sys.argv) >= 2):
+    playername = sys.argv[1].strip().lower()
+    if (core.isforbidden(playername) or playername in exitwords_reserved):
+        playername = raw_input("Entrez votre pseudo: ")
 else:
-    playername = sys.argv[1]
+    playername = raw_input("Entrez votre pseudo: ")
 #
+playername = playername.strip().lower()
+if (core.isforbidden(playername)):
+    print "Erreur: ce pseudo est interdit"
+    sys.exit(0)
+elif (playername in exitwords_reserved):
+    sys.exit(0)
 list = core.load(playername)
 Str = ""
 Strlist = []
