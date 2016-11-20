@@ -149,8 +149,11 @@ try:
                         core.add(list, x, y)
                 except ValueError, e:
                     print e
+                except Exception, e:
+                    traceback.print_exc()
         except Exception, e:
-            traceback.print_exc()
+            if (Str != ""):
+                traceback.print_exc()
 except KeyboardInterrupt, e:
     pass
 except Exception, e:
