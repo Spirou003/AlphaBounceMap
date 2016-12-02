@@ -8,6 +8,32 @@ datadir = "data"+os.sep
 if (not os.path.isdir("saves")):
     os.mkdir("saves")
 #
+def readconfigfile(filename):
+    file = open(datadir+os.sep+filename, "r")
+    sections = {}
+    currentsection = None
+    for line in file:
+        line = line.strip().lower()
+        if (len(line) == 0):
+            continue
+        N = len(line)
+        if (line[0] == "[" and line[N-1] == "]"):
+            sectionname = line[1:N-1]
+            if (sectionname in sections):
+                currentsection = sections[sectionname]
+            else:
+                currentsection = {}
+                sections[sectionname] = currentsection
+        elif ("=" in line):
+            pos = line.find("=")
+            key = line[:pos].strip()
+            value = line[pos+1:].strip()
+            currentsection[key] = value
+        else:
+            #ignore line
+            pass
+    return sections
+#
 def isforbidden(pseudo):
     return (not pseudo.isalnum())
 #

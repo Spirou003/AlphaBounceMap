@@ -5,6 +5,7 @@ import core, map
 
 datadir = core.datadir
 
+colors = map.getcolorsconfig()
 mapwords = core.loadWords(datadir+"words_map.txt")
 savewords = core.loadWords(datadir+"words_save.txt")
 viewwords = core.loadWords(datadir+"words_view.txt")

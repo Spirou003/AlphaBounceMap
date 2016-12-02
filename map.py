@@ -4,6 +4,50 @@ from PIL import Image, ImageColor, ImageDraw
 
 import core
 
+def getcolorsconfig():
+    sections = core.readconfigfile("colors.ini")
+    if ("example" in sections):
+        del sections["example"]
+    newsections = {}
+    refs = []
+    #interpret config file to have only integers
+    for sectionname in sections:
+        configs = sections[sectionname]
+        newconfigs = {}
+        for configname in configs:
+            rgba = configs[configname].split(" ")
+            ext = configs[configname].split(".")
+            if (len(rgba) in [3,4]):
+                if (len(rgba) == 3):
+                    rgba.append(255)
+                (r, g, b, a) = rgba
+                try:
+                    newconfigs[configname] = (int(r), int(g), int(b), int(a))
+                except Exception, e:
+                    #unknown format
+                    pass
+            elif (len(ext) == 2):
+                refs.append((newconfigs, configname, ext))
+            else:
+                #unknown format
+                pass
+        newsections[sectionname] = newconfigs
+    oldreflen = -1
+    #resolve as many cross-references as possible
+    while (len(refs) != 0 and len(refs) != oldreflen):
+        i = 0
+        for i in xrange(0, len(refs)):
+            try:
+                (newconfigs, configname, extsection, extconfig) = refs[i]
+                newconfigs[configname] = newsections[extsection][extconfig]
+                refs.remove((newconfigs, configname, extsection, extconfig))
+                break
+            except Exception, e:
+                #not added yet, or impossible to add => do nothing
+                pass
+        oldreflen = len(refs)
+    return newsections
+#
 def getMapFilename(playername):
     return core.prefix(playername)+".png"
 #
@@ -22,7 +66,7 @@ def readcoordsfilewlimits(filename, xmin, xmax, ymin, ymax):
     file = open(filename, "r")
     list = []
     for line in file:
-        Line = line.strip().split(SEP)
+        Line = line.strip().split(core.SEP)
         (x, y) = (int(Line[0]),int(Line[1]))
         list.append((x, y))
         (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
@@ -42,8 +86,8 @@ def makeMap(playername, list, planets):
                 (x, y) = coords
                 planetscoords.append((x, y))
                 (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
-        (missiles, xmin, xmax, ymin, ymax) = readcoordsfilewlimits(datadir+"coords_missiles.txt", xmin, xmax, ymin, ymax)
-        (asteroides, xmin, xmax, ymin, ymax) = readcoordsfilewlimits(datadir+"coords_asteroides.txt", xmin, xmax, ymin, ymax)
+        (missiles, xmin, xmax, ymin, ymax) = readcoordsfilewlimits(core.datadir+"coords_missiles.txt", xmin, xmax, ymin, ymax)
+        (asteroides, xmin, xmax, ymin, ymax) = readcoordsfilewlimits(core.datadir+"coords_asteroides.txt", xmin, xmax, ymin, ymax)
         lastnettoyage = []
         if (os.path.isfile(core.prefix(playername)+".lastnettoyage.txt")):
             file = open(core.prefix(playername)+".lastnettoyage.txt", "r")
