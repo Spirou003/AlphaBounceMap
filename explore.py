@@ -1,6 +1,7 @@
 import os, sys
 import traceback
-import core
+
+import core, map
 
 datadir = core.datadir
 
@@ -78,11 +79,11 @@ try:
                 if (not planets_loaded):
                     core.loadPlanets(datadir+"coords_planets.txt", planets)
                     planets_loaded = True
-                core.makeMap(playername, list, planets)
+                map.makeMap(playername, list, planets)
             elif (core.oneIn(savewords, Strlist)):
                 core.save(playername, list, None)
             elif (core.oneIn(viewwords, Strlist)):
-                os.system(core.getMapFilename(playername))
+                os.system(map.getMapFilename(playername))
             elif (core.oneIn(exitwords, Strlist)):
                 pass #nothing to do
             elif ("zone" in Strlist):
