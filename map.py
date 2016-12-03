@@ -4,6 +4,8 @@ from PIL import Image, ImageColor, ImageDraw
 
 import core
 
+colors = None
+
 def getcolorsconfig():
     sections = core.readconfigfile("colors.ini")
     if ("example" in sections):
@@ -27,7 +29,7 @@ def getcolorsconfig():
                     #unknown format
                     pass
             elif (len(ext) == 2):
-                refs.append((newconfigs, configname, ext))
+                refs.append((sectionname, configname, ext))
             else:
                 #unknown format
                 pass
@@ -36,16 +38,17 @@ def getcolorsconfig():
     #resolve as many cross-references as possible
     while (len(refs) != 0 and len(refs) != oldreflen):
         i = 0
-        for i in xrange(0, len(refs)):
+        oldreflen = len(refs)
+        while (i < oldreflen):
             try:
-                (newconfigs, configname, extsection, extconfig) = refs[i]
-                newconfigs[configname] = newsections[extsection][extconfig]
-                refs.remove((newconfigs, configname, extsection, extconfig))
-                break
+                (sectionname, configname, (extsection, extconfig)) = refs[i]
+                if (extsection in newsections and extconfig in newsections[extsection]):
+                    newsections[sectionname][configname] = newsections[extsection][extconfig]
+                    refs.pop(i)
+                    i = oldreflen
             except Exception, e:
                 #not added yet, or impossible to add => do nothing
                 pass
-        oldreflen = len(refs)
     return newsections
 #
 def getMapFilename(playername):
@@ -117,7 +120,7 @@ def makeMap(playername, list, planets):
         xmax += 5
         ymin -= 5
         ymax += 5
-        image = Image.new("RGB", (xmax-xmin+1, ymax-ymin+1), "#0000aa")
+        image = Image.new("RGB", (xmax-xmin+1, ymax-ymin+1), colors["background"]["default"])
         draw = ImageDraw.Draw(image)
         i = 0
         while (i < xmax):
@@ -139,23 +142,31 @@ def makeMap(playername, list, planets):
             for el in list:
                 (x, y) = el
                 image.putpixel((x-xmin, y-ymin), color)
-        drawlist(planetscoords, image, xmin, xmax, ymin, ymax, (0,0,0))
-        drawlist(asteroides, image, xmin, xmax, ymin, ymax, (95,71,39))
-        drawlist(missiles, image, xmin, xmax, ymin, ymax, (255,255,255))
+        drawlist(planetscoords, image, xmin, xmax, ymin, ymax, colors["planets"]["default"])
+        drawlist(asteroides, image, xmin, xmax, ymin, ymax, colors["asteroids"]["default"])
+        drawlist(missiles, image, xmin, xmax, ymin, ymax, colors["background"]["onobjective"])
         drawlist(lastnettoyage, image, xmin, xmax, ymin, ymax, (0,128,0))
-        drawlist(objectifs, image, xmin, xmax, ymin, ymax, (0,128,0))
+        drawlist(objectifs, image, xmin, xmax, ymin, ymax, colors["background"]["onobjective"])
         for el in list:
             (x, y) = el
-            color = (200,0,0)
+            color = colors["background"]["onexplore"]
             if (el in lastnettoyage or el in objectifs):
                 color = (0,255,0)
             elif (el in planetscoords):
-                color = (128,128,128)
+                color = colors["planets"]["onexplore"]
             elif (el in asteroides):
-                color = (191,142,78)
+                color = colors["asteroids"]["onexplore"]
             image.putpixel((x-xmin, y-ymin), color)
         del draw
         image.save(getMapFilename(playername), "PNG")
     except Exception, e:
         traceback.print_exc()
 #
+
+colors = getcolorsconfig()
+
+for sectionname in colors:
+    section=colors[sectionname]
+    print sectionname
+    for configname in section:
+        print "   "+configname+":"+str(section[configname])
