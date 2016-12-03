@@ -10,12 +10,12 @@ if (not os.path.isdir("saves")):
 #
 def readcoordsfile(filename, mode = "r"):
     file = open(filename, mode)
-    list = []
+    coords = set()
     for line in file:
         Line = line.strip().split(SEP)
-        list.append((int(Line[0]),int(Line[1])))
+        coords.add((int(Line[0]),int(Line[1])))
     file.close()
-    return list
+    return coords
 #
 def readconfigfile(filename):
     file = open(datadir+os.sep+filename, "r")
@@ -46,36 +46,36 @@ def readconfigfile(filename):
 def isforbidden(pseudo):
     return (not pseudo.isalnum())
 #
-def removefromlist(list, toremove):
+def removefromlist(collection, toremove):
     for el in toremove:
-        if (el in list):
-            list.remove(el)
+        if (el in collection):
+            collection.remove(el)
 #
-def search(x, y, list):
+def search(x, y, explorations):
     i = 0
-    for el in list:
+    for el in explorations:
         if (el[0] == x and el[1] == y):
             return i
         i += 1
     return None
 #
-def add(list, x, y):
-    if (search(x, y, list) == None):
-        list.append((x, y))
-        list.sort()
+def add(explorations, x, y):
+    if ((x, y) not in explorations):
+        explorations.add((x, y))
     else:
         raise ValueError("("+str(x)+" "+str(y)+") est deja explore")
 #
-def remove(list, x, y):
-    index = search(x, y, list)
-    if (index == None):
+def remove(explorations, x, y):
+    if ((x, y) not in explorations):
         raise ValueError("("+str(x)+" "+str(y)+") n'est pas encore explore")
-    list.pop(index)
+    explorations.remove((x, y))
 #
-def save(playername, list, lastentered):
+def save(playername, explorations, lastentered):
     filename = prefix(playername)+".txt"
     file = open(filename, "w+")
-    for el in list:
+    explorations_list = list(explorations)
+    explorations_list.sort()
+    for el in explorations_list:
         file.write(str(el[0])+SEP+str(el[1])+"\n")
     file.close()
 #
@@ -87,9 +87,7 @@ def load(playername):
     mode = "r+"
     if (not os.path.exists(filename)):
         mode = "w+"
-    list = readcoordsfile(filename, mode)
-    list.sort()
-    return list
+    return readcoordsfile(filename, mode)
 #
 def loadWords(filename):
     try:

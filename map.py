@@ -11,10 +11,10 @@ def getplanetcoords(planets):
     global coords
     if ("planets" in coords):
         return
-    planetscoords = []
+    planetscoords = set()
     for planetname in planets:
         for (x, y) in planets[planetname]:
-            planetscoords.append((x, y))
+            planetscoords.add((x, y))
     coords["planets"] = planetscoords
 #
 def getnamefrom_coords_name_txt(filename, coords, txt):
@@ -115,18 +115,18 @@ def drawgrid(draw, xmin, xmax, ymin, ymax, GRID=10):
         draw.line([(0, i-ymin), (xmax-xmin, i-ymin)], (100, 0, 170))
         i -= GRID
 #
-def drawlist(key, keylist, image, xmin, xmax, ymin, ymax, colors, list):
+def drawlist(key, keylist, image, xmin, xmax, ymin, ymax, colors, explorations_copy):
     for (x, y) in keylist:
-        if ((x, y) in list):
+        if ((x, y) in explorations_copy):
             image.putpixel((x-xmin, y-ymin), colors["onexplore"])
-            list.remove((x, y))
+            explorations_copy.remove((x, y))
         else:
             image.putpixel((x-xmin, y-ymin), colors["default"])
 #
-def makeMap(playername, list, planets):
+def makeMap(playername, explorations, planets):
     try:
         (xmin, xmax, ymin, ymax) = (0, 0, 0, 0)
-        for el in list:
+        for el in explorations:
             (x, y) = el
             (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
         getplanetcoords(planets)
@@ -160,17 +160,17 @@ def makeMap(playername, list, planets):
         xmax += 5
         ymin -= 5
         ymax += 5
-        image = Image.new("RGB", (xmax-xmin+1, ymax-ymin+1), colors["background"]["default"])
+        image = Image.new("RGBA", (xmax-xmin+1, ymax-ymin+1), colors["background"]["default"])
         draw = ImageDraw.Draw(image)
         drawgrid(draw, xmin, xmax, ymin, ymax)
-        copylist = list[:]
+        explorations_copy = explorations.copy()
         for key in coords:
-            drawlist(key, coords[key], image, xmin, xmax, ymin, ymax, colors[key], copylist)
-        for el in copylist:
+            drawlist(key, coords[key], image, xmin, xmax, ymin, ymax, colors[key], explorations_copy)
+        for el in explorations_copy:
             (x, y) = el
             color = colors["background"]["onexplore"]
             if (el in lastnettoyage):
-                color = (0,255,0)
+                color = (0,255,0, 0)
             image.putpixel((x-xmin, y-ymin), color)
         del draw
         image.save(getMapFilename(playername), "PNG")

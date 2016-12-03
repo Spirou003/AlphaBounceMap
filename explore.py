@@ -43,7 +43,7 @@ if (core.isforbidden(playername)):
     sys.exit(0)
 elif (playername in exitwords_reserved):
     sys.exit(0)
-list = core.load(playername)
+explorations = core.load(playername)
 Str = ""
 Strlist = []
 print 'Tapez "help" pour obtenir de l\'aide'
@@ -79,9 +79,9 @@ try:
                 if (not planets_loaded):
                     core.loadPlanets(datadir+"coords_planets.txt", planets)
                     planets_loaded = True
-                map.makeMap(playername, list, planets)
+                map.makeMap(playername, explorations, planets)
             elif (core.oneIn(savewords, Strlist)):
-                core.save(playername, list, None)
+                core.save(playername, explorations, None)
             elif (core.oneIn(viewwords, Strlist)):
                 os.system(map.getMapFilename(playername))
             elif (core.oneIn(exitwords, Strlist)):
@@ -102,9 +102,9 @@ try:
                     for y in xrange(y1, y2+1):
                         try:
                             if (b):
-                                core.remove(list, x, y)
+                                core.remove(explorations, x, y)
                             else:
-                                core.add(list, x, y)
+                                core.add(explorations, x, y)
                         except ValueError, e:
                             print e
                         except Exception, e:
@@ -123,7 +123,7 @@ try:
                 if ("d" in Strlist):
                     for (x, y) in planets[name]:
                         try:
-                            core.remove(list, x, y)
+                            core.remove(explorations, x, y)
                         except ValueError, e:
                             print e
                         except Exception, e:
@@ -131,7 +131,7 @@ try:
                 else:
                     for (x, y) in planets[name]:
                         try:
-                            core.add(list, x, y)
+                            core.add(explorations, x, y)
                         except ValueError, e:
                             print e
                         except Exception, e:
@@ -145,9 +145,9 @@ try:
                 y = int(y)
                 try:
                     if (b):
-                        core.remove(list, x, y)
+                        core.remove(explorations, x, y)
                     else:
-                        core.add(list, x, y)
+                        core.add(explorations, x, y)
                 except ValueError, e:
                     print e
                 except Exception, e:
