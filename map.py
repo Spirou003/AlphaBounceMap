@@ -5,7 +5,39 @@ from PIL import Image, ImageColor, ImageDraw
 import core
 
 colors = None
+coords = {}
 
+def getplanetcoords(planets):
+    global coords
+    if ("planets" in coords):
+        return
+    planetscoords = []
+    for planetname in planets:
+        for (x, y) in planets[planetname]:
+            planetscoords.append((x, y))
+    coords["planets"] = planetscoords
+#
+def getnamefrom_coords_name_txt(filename, coords, txt):
+    if (len(filename) <= len(coords)+len(txt)):
+        return None
+    for i in xrange(0, len(coords)):
+        if (filename[i] != coords[i]):
+            return None
+    endfilename = filename[-len(txt):]
+    for i in xrange(0, len(txt)):
+        if (endfilename[i] != txt[i]):
+            return None
+    return filename[len(coords):len(filename)-len(txt)]
+#
+def loadcoords():
+    patternbegin = "coords_"
+    patternend = ".txt"
+    filenames = os.listdir(core.datadir)
+    for filename in filenames:
+        name = getnamefrom_coords_name_txt(filename, "coords_", ".txt")
+        if (name != None and name != "planets" and name not in coords):
+            coords[name] = core.readcoordsfile(core.datadir+os.sep+filename)
+#
 def getcolorsconfig():
     sections = core.readconfigfile("colors.ini")
     if ("example" in sections):
@@ -65,32 +97,43 @@ def gridlimits(xmin, xmax, ymin, ymax, x, y):
         ymax = y
     return (xmin, xmax, ymin, ymax)
 #
-def readcoordsfilewlimits(filename, xmin, xmax, ymin, ymax):
-    file = open(filename, "r")
-    list = []
-    for line in file:
-        Line = line.strip().split(core.SEP)
-        (x, y) = (int(Line[0]),int(Line[1]))
-        list.append((x, y))
-        (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
-    file.close()
-    return (list, xmin, xmax, ymin, ymax)
+def drawgrid(draw, xmin, xmax, ymin, ymax, GRID=10):
+    i = 0
+    while (i < xmax):
+        draw.line([(i-xmin, 0), (i-xmin, ymax-ymin)], (100, 0, 170))
+        i += GRID
+    i = -GRID
+    while (i > xmin):
+        draw.line([(i-xmin, 0), (i-xmin, ymax-ymin)], (100, 0, 170))
+        i -= GRID
+    i = 0
+    while (i < ymax):
+        draw.line([(0, i-ymin), (xmax-xmin, i-ymin)], (100, 0, 170))
+        i += GRID
+    i = -GRID
+    while (i > ymin):
+        draw.line([(0, i-ymin), (xmax-xmin, i-ymin)], (100, 0, 170))
+        i -= GRID
+#
+def drawlist(key, keylist, image, xmin, xmax, ymin, ymax, colors, list):
+    for (x, y) in keylist:
+        if ((x, y) in list):
+            image.putpixel((x-xmin, y-ymin), colors["onexplore"])
+            list.remove((x, y))
+        else:
+            image.putpixel((x-xmin, y-ymin), colors["default"])
 #
 def makeMap(playername, list, planets):
-    GRID = 10
     try:
-        (xmin, xmax, ymin, ymax) = (list[0][0], list[0][0], list[0][1], list[0][1])
+        (xmin, xmax, ymin, ymax) = (0, 0, 0, 0)
         for el in list:
             (x, y) = el
             (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
-        planetscoords = []
-        for planetname in planets:
-            for coords in planets[planetname]:
-                (x, y) = coords
-                planetscoords.append((x, y))
+        getplanetcoords(planets)
+        loadcoords()
+        for key in coords:
+            for (x, y) in coords[key]:
                 (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
-        (missiles, xmin, xmax, ymin, ymax) = readcoordsfilewlimits(core.datadir+"coords_missiles.txt", xmin, xmax, ymin, ymax)
-        (asteroides, xmin, xmax, ymin, ymax) = readcoordsfilewlimits(core.datadir+"coords_asteroides.txt", xmin, xmax, ymin, ymax)
         lastnettoyage = []
         if (os.path.isfile(core.prefix(playername)+".lastnettoyage.txt")):
             file = open(core.prefix(playername)+".lastnettoyage.txt", "r")
@@ -113,49 +156,21 @@ def makeMap(playername, list, planets):
                 elif (y2 > ymax):
                     ymax = y2
             file.close()
-        objectifs = []
-        if (os.path.isfile(core.prefix(playername)+".objectifs.txt")):
-            (objectifs, xmin, xmax, ymin, ymax) = readcoordsfilewlimits(core.prefix(playername)+".objectifs.txt", xmin, xmax, ymin, ymax)
         xmin -= 5
         xmax += 5
         ymin -= 5
         ymax += 5
         image = Image.new("RGB", (xmax-xmin+1, ymax-ymin+1), colors["background"]["default"])
         draw = ImageDraw.Draw(image)
-        i = 0
-        while (i < xmax):
-            draw.line([(i-xmin, 0), (i-xmin, ymax-ymin)], (100, 0, 170))
-            i += GRID
-        i = -GRID
-        while (i > xmin):
-            draw.line([(i-xmin, 0), (i-xmin, ymax-ymin)], (100, 0, 170))
-            i -= GRID
-        i = 0
-        while (i < ymax):
-            draw.line([(0, i-ymin), (xmax-xmin, i-ymin)], (100, 0, 170))
-            i += GRID
-        i = -GRID
-        while (i > ymin):
-            draw.line([(0, i-ymin), (xmax-xmin, i-ymin)], (100, 0, 170))
-            i -= GRID
-        def drawlist(list, image, xmin, xmax, ymin, ymax, color):
-            for el in list:
-                (x, y) = el
-                image.putpixel((x-xmin, y-ymin), color)
-        drawlist(planetscoords, image, xmin, xmax, ymin, ymax, colors["planets"]["default"])
-        drawlist(asteroides, image, xmin, xmax, ymin, ymax, colors["asteroids"]["default"])
-        drawlist(missiles, image, xmin, xmax, ymin, ymax, colors["background"]["onobjective"])
-        drawlist(lastnettoyage, image, xmin, xmax, ymin, ymax, (0,128,0))
-        drawlist(objectifs, image, xmin, xmax, ymin, ymax, colors["background"]["onobjective"])
-        for el in list:
+        drawgrid(draw, xmin, xmax, ymin, ymax)
+        copylist = list[:]
+        for key in coords:
+            drawlist(key, coords[key], image, xmin, xmax, ymin, ymax, colors[key], copylist)
+        for el in copylist:
             (x, y) = el
             color = colors["background"]["onexplore"]
-            if (el in lastnettoyage or el in objectifs):
+            if (el in lastnettoyage):
                 color = (0,255,0)
-            elif (el in planetscoords):
-                color = colors["planets"]["onexplore"]
-            elif (el in asteroides):
-                color = colors["asteroids"]["onexplore"]
             image.putpixel((x-xmin, y-ymin), color)
         del draw
         image.save(getMapFilename(playername), "PNG")
@@ -165,8 +180,3 @@ def makeMap(playername, list, planets):
 
 colors = getcolorsconfig()
 
-for sectionname in colors:
-    section=colors[sectionname]
-    print sectionname
-    for configname in section:
-        print "   "+configname+":"+str(section[configname])

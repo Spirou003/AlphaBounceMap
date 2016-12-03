@@ -8,6 +8,15 @@ datadir = "data"+os.sep
 if (not os.path.isdir("saves")):
     os.mkdir("saves")
 #
+def readcoordsfile(filename, mode = "r"):
+    file = open(filename, mode)
+    list = []
+    for line in file:
+        Line = line.strip().split(SEP)
+        list.append((int(Line[0]),int(Line[1])))
+    file.close()
+    return list
+#
 def readconfigfile(filename):
     file = open(datadir+os.sep+filename, "r")
     sections = {}
@@ -78,13 +87,8 @@ def load(playername):
     mode = "r+"
     if (not os.path.exists(filename)):
         mode = "w+"
-    file = open(filename, mode)
-    list = []
-    for line in file:
-        Line = line.strip().split(SEP)
-        list.append((int(Line[0]),int(Line[1])))
+    list = readcoordsfile(filename, mode)
     list.sort()
-    file.close()
     return list
 #
 def loadWords(filename):
@@ -116,4 +120,3 @@ def oneIn(list, string):
         if name in string:
             return True
     return False
-#
