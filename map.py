@@ -116,16 +116,28 @@ def drawgrid(draw, xmin, xmax, ymin, ymax, GRID=10):
         i -= GRID
 #
 def putpixel(image, x, y, color):
-    image.putpixel((x, y), color)
+    pixel = image.getpixel((x, y))
+    newpixr = color[0]/255.
+    newpixg = color[1]/255.
+    newpixb = color[2]/255.
+    newpixa = color[3]/255.
+    oldpixr = pixel[0]/255.
+    oldpixg = pixel[1]/255.
+    oldpixb = pixel[2]/255.
+    oldpixa = pixel[3]/255.
+    coeff = (1-newpixa)*oldpixa
+    r = int(255*(newpixr*newpixa + coeff*oldpixr))
+    g = int(255*(newpixg*newpixa + coeff*oldpixg))
+    b = int(255*(newpixb*newpixa + coeff*oldpixb))
+    a = int(255*(1-(1-newpixa)*(1-oldpixa)))
+    image.putpixel((x, y), (r, g, b, a))
 #
 def drawlist(key, keylist, image, xmin, xmax, ymin, ymax, colors, explorations_copy, objectifs_copy):
     for (x, y) in keylist:
         if ((x, y) in objectifs_copy):
             putpixel(image, x-xmin, y-ymin, colors["onobjective"])
-            objectifs_copy.remove((x, y))
         elif ((x, y) in explorations_copy):
             putpixel(image, x-xmin, y-ymin, colors["onexplore"])
-            explorations_copy.remove((x, y))
         else:
             putpixel(image, x-xmin, y-ymin, colors["default"])
 #
@@ -140,7 +152,7 @@ def makeMap(playername, explorations, planets):
         for key in coords:
             for (x, y) in coords[key]:
                 (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
-        objectifs = []
+        objectifs = set()
         if (os.path.isfile(core.prefix(playername)+".objectifs.txt")):
             objectifs = core.readcoordsfile(core.prefix(playername)+".objectifs.txt")
         for (x, y) in objectifs:
@@ -156,6 +168,9 @@ def makeMap(playername, explorations, planets):
         explorations_copy = explorations.copy()
         for key in coords:
             drawlist(key, coords[key], image, xmin, xmax, ymin, ymax, colors[key], explorations_copy, objectifs_copy)
+        for key in coords:
+            core.removefromlist(explorations_copy, coords[key])
+            core.removefromlist(objectifs_copy, coords[key])
         for (x, y) in explorations_copy:
             color = None
             if ((x, y) in objectifs_copy):
