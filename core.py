@@ -12,8 +12,18 @@ def readcoordsfile(filename, mode = "r"):
     file = open(filename, mode)
     coords = set()
     for line in file:
-        Line = line.strip().split(SEP)
-        coords.add((int(Line[0]),int(Line[1])))
+        Line = line.strip()
+        if ('[' == Line[0]):
+            Line = Line[1:-1].split("] ... [")
+            (x1,y1) = Line[0].split(",")
+            (x2,y2) = Line[1].split("][")
+            (x1,x2,y1,y2) = (int(x1),int(x2),int(y1),int(y2))
+            for x in xrange(x1, x2+1):
+                for y in xrange(y1, y2+1):
+                    coords.add((x, y))
+        else:
+            Line = Line.split(SEP)
+            coords.add((int(Line[0]),int(Line[1])))
     file.close()
     return coords
 #

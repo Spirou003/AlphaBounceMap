@@ -115,13 +115,19 @@ def drawgrid(draw, xmin, xmax, ymin, ymax, GRID=10):
         draw.line([(0, i-ymin), (xmax-xmin, i-ymin)], (100, 0, 170))
         i -= GRID
 #
-def drawlist(key, keylist, image, xmin, xmax, ymin, ymax, colors, explorations_copy):
+def putpixel(image, x, y, color):
+    image.putpixel((x, y), color)
+#
+def drawlist(key, keylist, image, xmin, xmax, ymin, ymax, colors, explorations_copy, objectifs_copy):
     for (x, y) in keylist:
-        if ((x, y) in explorations_copy):
-            image.putpixel((x-xmin, y-ymin), colors["onexplore"])
+        if ((x, y) in objectifs_copy):
+            putpixel(image, x-xmin, y-ymin, colors["onobjective"])
+            objectifs_copy.remove((x, y))
+        elif ((x, y) in explorations_copy):
+            putpixel(image, x-xmin, y-ymin, colors["onexplore"])
             explorations_copy.remove((x, y))
         else:
-            image.putpixel((x-xmin, y-ymin), colors["default"])
+            putpixel(image, x-xmin, y-ymin, colors["default"])
 #
 def makeMap(playername, explorations, planets):
     try:
@@ -134,28 +140,12 @@ def makeMap(playername, explorations, planets):
         for key in coords:
             for (x, y) in coords[key]:
                 (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
-        lastnettoyage = []
-        if (os.path.isfile(core.prefix(playername)+".lastnettoyage.txt")):
-            file = open(core.prefix(playername)+".lastnettoyage.txt", "r")
-            for line in file:
-                if (len(line.strip()) == 0):
-                    continue
-                Line = ((line.strip())[1:-1]).split("] ... [")
-                (x1,y1) = Line[0].split(",")
-                (x2,y2) = Line[1].split("][")
-                (x1,x2,y1,y2) = (int(x1),int(x2),int(y1),int(y2))
-                for x in xrange(x1, x2+1):
-                    for y in xrange(y1, y2+1):
-                        lastnettoyage.append((x, y))
-                if (x1 < xmin):
-                    xmin = x1
-                elif (x2 > xmax):
-                    xmax = x2
-                if (y1 < ymin):
-                    ymin = y1
-                elif (y2 > ymax):
-                    ymax = y2
-            file.close()
+        objectifs = []
+        if (os.path.isfile(core.prefix(playername)+".objectifs.txt")):
+            objectifs = core.readcoordsfile(core.prefix(playername)+".objectifs.txt")
+        for (x, y) in objectifs:
+            (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
+        objectifs_copy = objectifs.copy()
         xmin -= 5
         xmax += 5
         ymin -= 5
@@ -165,12 +155,17 @@ def makeMap(playername, explorations, planets):
         drawgrid(draw, xmin, xmax, ymin, ymax)
         explorations_copy = explorations.copy()
         for key in coords:
-            drawlist(key, coords[key], image, xmin, xmax, ymin, ymax, colors[key], explorations_copy)
-        for el in explorations_copy:
-            (x, y) = el
-            color = colors["background"]["onexplore"]
-            if (el in lastnettoyage):
-                color = (0,255,0, 0)
+            drawlist(key, coords[key], image, xmin, xmax, ymin, ymax, colors[key], explorations_copy, objectifs_copy)
+        for (x, y) in explorations_copy:
+            color = None
+            if ((x, y) in objectifs_copy):
+                color = colors["background"]["onobjective"]
+                objectifs_copy.remove((x, y))
+            else:
+                color = colors["background"]["onexplore"]
+            image.putpixel((x-xmin, y-ymin), color)
+        color = colors["background"]["onobjective"]
+        for (x, y) in objectifs_copy:
             image.putpixel((x-xmin, y-ymin), color)
         del draw
         image.save(getMapFilename(playername), "PNG")
