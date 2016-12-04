@@ -4,6 +4,7 @@ from PIL import Image, ImageColor, ImageDraw
 
 import core
 
+axescolor = None
 colors = None
 coords = {}
 
@@ -81,7 +82,11 @@ def getcolorsconfig():
             except Exception, e:
                 #not added yet, or impossible to add => do nothing
                 pass
-    return newsections
+    axescolor = {"main":(255,255,0,92),"secondary":(255,255,255,32)}
+    if ("axes" in newsections):
+        axescolor = newsections["axes"]
+        del newsections["axes"]
+    return (newsections, axescolor)
 #
 def getMapFilename(playername):
     return core.prefix(playername)+".png"
@@ -97,23 +102,23 @@ def gridlimits(xmin, xmax, ymin, ymax, x, y):
         ymax = y
     return (xmin, xmax, ymin, ymax)
 #
-def drawgrid(draw, xmin, xmax, ymin, ymax, GRID=10):
-    i = 0
-    while (i < xmax):
-        draw.line([(i-xmin, 0), (i-xmin, ymax-ymin)], (100, 0, 170))
-        i += GRID
-    i = -GRID
-    while (i > xmin):
-        draw.line([(i-xmin, 0), (i-xmin, ymax-ymin)], (100, 0, 170))
-        i -= GRID
-    i = 0
-    while (i < ymax):
-        draw.line([(0, i-ymin), (xmax-xmin, i-ymin)], (100, 0, 170))
-        i += GRID
-    i = -GRID
-    while (i > ymin):
-        draw.line([(0, i-ymin), (xmax-xmin, i-ymin)], (100, 0, 170))
-        i -= GRID
+def drawgrid(image, xmin, xmax, ymin, ymax, GRID=10):
+    for x in xrange(xmin, xmax):
+        for y in xrange(ymin, ymax):
+            (cx, cy) = (x, y)
+            (axex, axey) = (0, 0)
+            while (cx % GRID == 0 and cx != 0):
+                axex += 1
+                cx /= GRID
+            while (cy % GRID == 0 and cy != 0):
+                axey += 1
+                cy /= GRID
+            n = max(axex, axey)
+            if (x == 0 or y == 0):
+                putpixel(image, x-xmin, y-ymin, axescolor["main"])
+            else:
+                for i in xrange(0, n):
+                    putpixel(image, x-xmin, y-ymin, axescolor["secondary"])
 #
 def putpixel(image, x, y, color):
     pixel = image.getpixel((x, y))
@@ -163,8 +168,6 @@ def makeMap(playername, explorations, planets):
         ymin -= 5
         ymax += 5
         image = Image.new("RGBA", (xmax-xmin+1, ymax-ymin+1), colors["background"]["default"])
-        draw = ImageDraw.Draw(image)
-        drawgrid(draw, xmin, xmax, ymin, ymax)
         explorations_copy = explorations.copy()
         for key in coords:
             drawlist(key, coords[key], image, xmin, xmax, ymin, ymax, colors[key], explorations_copy, objectifs_copy)
@@ -182,11 +185,11 @@ def makeMap(playername, explorations, planets):
         color = colors["background"]["onobjective"]
         for (x, y) in objectifs_copy:
             image.putpixel((x-xmin, y-ymin), color)
-        del draw
+        drawgrid(image, xmin, xmax, ymin, ymax)
         image.save(getMapFilename(playername), "PNG")
     except Exception, e:
         traceback.print_exc()
 #
 
-colors = getcolorsconfig()
+(colors, axescolor) = getcolorsconfig()
 
