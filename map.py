@@ -102,6 +102,22 @@ def gridlimits(xmin, xmax, ymin, ymax, x, y):
         ymax = y
     return (xmin, xmax, ymin, ymax)
 #
+def getgridlimits(explorations, coords, objectifs):
+    (xmin, xmax, ymin, ymax) = (0, 0, 0, 0)
+    for el in explorations:
+        (x, y) = el
+        (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
+    for key in coords:
+        for (x, y) in coords[key]:
+            (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
+    for (x, y) in objectifs:
+        (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
+    xmin -= 5
+    xmax += 5
+    ymin -= 5
+    ymax += 5
+    return (xmin, xmax, ymin, ymax)
+#
 def drawgrid(image, xmin, xmax, ymin, ymax, GRID=10):
     for x in xrange(xmin, xmax):
         for y in xrange(ymin, ymax):
@@ -146,47 +162,39 @@ def drawlist(key, keylist, image, xmin, xmax, ymin, ymax, colors, explorations, 
         else:
             putpixel(image, x-xmin, y-ymin, colors["default"])
 #
+def drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax, colors):
+    image = Image.new("RGBA", (xmax-xmin+1, ymax-ymin+1), colors["background"]["default"])
+    #draw explorations
+    for (x, y) in explorations:
+        color = None
+        if ((x, y) in objectifs):
+            color = colors["background"]["onobjective"]
+        else:
+            color = colors["background"]["onexplore"]
+        image.putpixel((x-xmin, y-ymin), color)
+    #draw entities (planets, asteroids, ...)
+    for key in coords:
+        drawlist(key, coords[key], image, xmin, xmax, ymin, ymax, colors[key], explorations, objectifs)
+    #draw each remaining objective
+    objectifs_copy = objectifs.copy()
+    for key in coords:
+        core.removefromlist(objectifs_copy, coords[key])
+        core.removefromlist(objectifs_copy, explorations)
+    color = colors["background"]["onobjective"]
+    for (x, y) in objectifs_copy:
+        image.putpixel((x-xmin, y-ymin), color)
+    drawgrid(image, xmin, xmax, ymin, ymax)
+    image.save(getMapFilename(playername), "PNG")
+#
 def makeMap(playername, explorations, planets):
     try:
-        (xmin, xmax, ymin, ymax) = (0, 0, 0, 0)
-        for el in explorations:
-            (x, y) = el
-            (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
         getplanetcoords(planets)
         loadcoords()
-        for key in coords:
-            for (x, y) in coords[key]:
-                (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
         objectifs = set()
         if (os.path.isfile(core.prefix(playername)+".objectifs.txt")):
             objectifs = core.readcoordsfile(core.prefix(playername)+".objectifs.txt")
-        for (x, y) in objectifs:
-            (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
-        objectifs_copy = objectifs.copy()
-        xmin -= 5
-        xmax += 5
-        ymin -= 5
-        ymax += 5
-        image = Image.new("RGBA", (xmax-xmin+1, ymax-ymin+1), colors["background"]["default"])
-        #draw explorations
-        for (x, y) in explorations:
-            color = None
-            if ((x, y) in objectifs):
-                color = colors["background"]["onobjective"]
-            else:
-                color = colors["background"]["onexplore"]
-            image.putpixel((x-xmin, y-ymin), color)
-        #draw entities (planets, asteroids, ...)
-        for key in coords:
-            drawlist(key, coords[key], image, xmin, xmax, ymin, ymax, colors[key], explorations, objectifs)
-        #mark each remaining objective
-        for key in coords:
-            core.removefromlist(objectifs_copy, coords[key])
-        color = colors["background"]["onobjective"]
-        for (x, y) in objectifs_copy:
-            image.putpixel((x-xmin, y-ymin), color)
-        drawgrid(image, xmin, xmax, ymin, ymax)
-        image.save(getMapFilename(playername), "PNG")
+        (xmin, xmax, ymin, ymax) = getgridlimits(explorations, coords, objectifs)
+        drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax, colors)
     except Exception, e:
         traceback.print_exc()
 #
