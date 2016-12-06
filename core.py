@@ -31,12 +31,12 @@ def readconfigfile(filename):
     file = open(datadir+os.sep+filename, "r")
     sections = {}
     currentsection = None
-    for line in file:
-        line = line.strip().lower()
+    for oline in file:
+        line = oline.strip().lower()
         if (len(line) == 0):
             continue
         N = len(line)
-        if (line[0] == "[" and line[N-1] == "]"):
+        if (oline[0] == "[" and line[N-1] == "]"):
             sectionname = line[1:N-1]
             if (sectionname in sections):
                 currentsection = sections[sectionname]
