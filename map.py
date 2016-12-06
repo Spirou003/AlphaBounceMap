@@ -137,11 +137,11 @@ def putpixel(image, x, y, color):
     a = int(255*(1-(1-newpixa)*(1-oldpixa)))
     image.putpixel((x, y), (r, g, b, a))
 #
-def drawlist(key, keylist, image, xmin, xmax, ymin, ymax, colors, explorations_copy, objectifs_copy):
+def drawlist(key, keylist, image, xmin, xmax, ymin, ymax, colors, explorations, objectifs):
     for (x, y) in keylist:
-        if ((x, y) in objectifs_copy):
+        if ((x, y) in objectifs):
             putpixel(image, x-xmin, y-ymin, colors["onobjective"])
-        elif ((x, y) in explorations_copy):
+        elif ((x, y) in explorations):
             putpixel(image, x-xmin, y-ymin, colors["onexplore"])
         else:
             putpixel(image, x-xmin, y-ymin, colors["default"])
@@ -168,20 +168,20 @@ def makeMap(playername, explorations, planets):
         ymin -= 5
         ymax += 5
         image = Image.new("RGBA", (xmax-xmin+1, ymax-ymin+1), colors["background"]["default"])
-        explorations_copy = explorations.copy()
-        for key in coords:
-            drawlist(key, coords[key], image, xmin, xmax, ymin, ymax, colors[key], explorations_copy, objectifs_copy)
-        for key in coords:
-            core.removefromlist(explorations_copy, coords[key])
-            core.removefromlist(objectifs_copy, coords[key])
-        for (x, y) in explorations_copy:
+        #draw explorations
+        for (x, y) in explorations:
             color = None
-            if ((x, y) in objectifs_copy):
+            if ((x, y) in objectifs):
                 color = colors["background"]["onobjective"]
-                objectifs_copy.remove((x, y))
             else:
                 color = colors["background"]["onexplore"]
             image.putpixel((x-xmin, y-ymin), color)
+        #draw entities (planets, asteroids, ...)
+        for key in coords:
+            drawlist(key, coords[key], image, xmin, xmax, ymin, ymax, colors[key], explorations, objectifs)
+        #mark each remaining objective
+        for key in coords:
+            core.removefromlist(objectifs_copy, coords[key])
         color = colors["background"]["onobjective"]
         for (x, y) in objectifs_copy:
             image.putpixel((x-xmin, y-ymin), color)
