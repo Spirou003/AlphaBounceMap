@@ -4,12 +4,7 @@ from PIL import Image, ImageColor, ImageDraw
 
 import core
 
-axescolor = None
-colors = None
-coords = {}
-
-def getplanetcoords(planets):
-    global coords
+def getplanetcoords(planets, coords):
     if ("planets" in coords):
         return
     planetscoords = set()
@@ -30,7 +25,7 @@ def getnamefrom_coords_name_txt(filename, coords, txt):
             return None
     return filename[len(coords):len(filename)-len(txt)]
 #
-def loadcoords():
+def loadcoords(coords):
     patternbegin = "coords_"
     patternend = ".txt"
     filenames = os.listdir(core.datadir)
@@ -43,6 +38,9 @@ def getcolorsconfig():
     sections = core.readconfigfile("colors.ini")
     if ("example" in sections):
         del sections["example"]
+    if ("display" in sections):
+        draworder = sections["display"]["order"].split(" ")
+        del sections["display"]
     newsections = {}
     refs = []
     #interpret config file to have only integers
@@ -86,7 +84,11 @@ def getcolorsconfig():
     if ("axes" in newsections):
         axescolor = newsections["axes"]
         del newsections["axes"]
-    return (newsections, axescolor)
+    #we need to have all config names for drawing, get missings if there are
+    for key in newsections:
+        if (key not in draworder):
+            draworder.append(key)
+    return (newsections, axescolor, draworder)
 #
 def getMapFilename(playername):
     return core.prefix(playername)+".png"
@@ -118,7 +120,7 @@ def getgridlimits(explorations, coords, objectifs):
     ymax += 5
     return (xmin, xmax, ymin, ymax)
 #
-def drawgrid(image, xmin, xmax, ymin, ymax, GRID=10):
+def drawgrid(image, axescolor, xmin, xmax, ymin, ymax, GRID=10):
     for x in xrange(xmin, xmax):
         for y in xrange(ymin, ymax):
             (cx, cy) = (x, y)
@@ -153,7 +155,7 @@ def putpixel(image, x, y, color):
     a = int(255*(1-(1-newpixa)*(1-oldpixa)))
     image.putpixel((x, y), (r, g, b, a))
 #
-def drawlist(key, keylist, image, xmin, xmax, ymin, ymax, colors, explorations, objectifs):
+def drawlist(keylist, image, xmin, xmax, ymin, ymax, colors, explorations, objectifs):
     for (x, y) in keylist:
         if ((x, y) in objectifs):
             putpixel(image, x-xmin, y-ymin, colors["onobjective"])
@@ -162,7 +164,7 @@ def drawlist(key, keylist, image, xmin, xmax, ymin, ymax, colors, explorations, 
         else:
             putpixel(image, x-xmin, y-ymin, colors["default"])
 #
-def drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax, colors):
+def drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax, colors, draworder, axescolor):
     image = Image.new("RGBA", (xmax-xmin+1, ymax-ymin+1), colors["background"]["default"])
     #draw explorations
     for (x, y) in explorations:
@@ -173,8 +175,9 @@ def drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax,
             color = colors["background"]["onexplore"]
         image.putpixel((x-xmin, y-ymin), color)
     #draw entities (planets, asteroids, ...)
-    for key in coords:
-        drawlist(key, coords[key], image, xmin, xmax, ymin, ymax, colors[key], explorations, objectifs)
+    for key in draworder:
+        if (key in coords):
+            drawlist(coords[key], image, xmin, xmax, ymin, ymax, colors[key], explorations, objectifs)
     #draw each remaining objective
     objectifs_copy = objectifs.copy()
     for key in coords:
@@ -183,21 +186,22 @@ def drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax,
     color = colors["background"]["onobjective"]
     for (x, y) in objectifs_copy:
         image.putpixel((x-xmin, y-ymin), color)
-    drawgrid(image, xmin, xmax, ymin, ymax)
+    drawgrid(image, axescolor, xmin, xmax, ymin, ymax)
     image.save(getMapFilename(playername), "PNG")
 #
 def makeMap(playername, explorations, planets):
     try:
-        getplanetcoords(planets)
-        loadcoords()
+        (colors, axescolor, draworder) = getcolorsconfig()
+        coords = {}
+        getplanetcoords(planets, coords)
+        loadcoords(coords)
         objectifs = set()
         if (os.path.isfile(core.prefix(playername)+".objectifs.txt")):
             objectifs = core.readcoordsfile(core.prefix(playername)+".objectifs.txt")
         (xmin, xmax, ymin, ymax) = getgridlimits(explorations, coords, objectifs)
-        drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax, colors)
+        drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax, colors, draworder, axescolor)
     except Exception, e:
         traceback.print_exc()
 #
 
-(colors, axescolor) = getcolorsconfig()
 
