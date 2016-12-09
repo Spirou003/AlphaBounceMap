@@ -1,28 +1,32 @@
 import os, sys
 import traceback
 
-import core, map
+import Core, Map, Data
 
-datadir = core.datadir
+DATADIR = Core.DATADIR
+SAVEDIR = Data.SAVEDIR
 
-mapwords = core.loadWords(datadir+"words_map.txt")
-savewords = core.loadWords(datadir+"words_save.txt")
-viewwords = core.loadWords(datadir+"words_view.txt")
-exitwords = core.loadWords(datadir+"words_exit.txt")
+if (not os.path.isdir("saves")):
+    os.mkdir("saves")
+
+mapwords = Core.loadWords(DATADIR+"words_map.txt")
+savewords = Core.loadWords(DATADIR+"words_save.txt")
+viewwords = Core.loadWords(DATADIR+"words_view.txt")
+exitwords = Core.loadWords(DATADIR+"words_exit.txt")
 exitwords_reserved = ("quit", "exit")
-planet_names = core.loadWords(datadir+"planet_names.txt")
+planet_names = Core.loadWords(DATADIR+"planet_names.txt")
 planets = {}
 for planetname in planet_names:
     planets[planetname] = []
 planets_loaded = False
 reservedwords = ["zone", "d", "help"] + planet_names
 
-core.removefromlist(mapwords, reservedwords)
-core.removefromlist(savewords, reservedwords)
-core.removefromlist(exitwords, reservedwords)
+Core.removefromlist(mapwords, reservedwords)
+Core.removefromlist(savewords, reservedwords)
+Core.removefromlist(exitwords, reservedwords)
 
 if (len(mapwords) == 0):
-    mapwords.append("map")
+    mapwords.append("Map")
 if (len(savewords) == 0):
     savewords.append("save")
 for exit_word in exitwords_reserved:
@@ -32,24 +36,24 @@ for exit_word in exitwords_reserved:
 playername = ""
 if (len(sys.argv) >= 2):
     playername = sys.argv[1].strip().lower()
-    if (core.isforbidden(playername) or playername in exitwords_reserved):
+    if (Core.isforbidden(playername) or playername in exitwords_reserved):
         playername = raw_input("Entrez votre pseudo: ")
 else:
     playername = raw_input("Entrez votre pseudo: ")
 #
 playername = playername.strip().lower()
-if (core.isforbidden(playername)):
+if (Core.isforbidden(playername)):
     print "Erreur: ce pseudo est interdit"
     sys.exit(0)
 elif (playername in exitwords_reserved):
     sys.exit(0)
-explorations = core.load(playername)
+explorations = Data.load(playername)
 Str = ""
 Strlist = []
 print 'Tapez "help" pour obtenir de l\'aide'
 b = False
 try:
-    while (not core.oneIn(exitwords, Strlist)):
+    while (not Core.oneIn(exitwords, Strlist)):
         Str = raw_input("> ").strip().lower()
         Strlist = Str.split(" ")
         try:
@@ -65,26 +69,26 @@ try:
                     print 'Valeurs possibles de "commandname" pour generer la carte: '+str(mapwords)
                     print 'Valeurs possibles de "commandname" pour sauvegarder les donnees: '+str(savewords)
                 else:
-                    if (core.oneIn(mapwords, Strlist)):
+                    if (Core.oneIn(mapwords, Strlist)):
                         print "Coming soon"
-                    elif (core.oneIn(savewords, Strlist)):
+                    elif (Core.oneIn(savewords, Strlist)):
                         print "Coming soon"
-                    elif (core.oneIn(planet_names, Strlist)):
+                    elif (Core.oneIn(planet_names, Strlist)):
                         print "Coming soon"
                     else:
                         Strlist.remove("help")
                         tempstring = " ".join(Strlist)
                         print 'Aucune commande du nom de "'+tempstring+'"'
-            elif (core.oneIn(mapwords, Strlist)):
+            elif (Core.oneIn(mapwords, Strlist)):
                 if (not planets_loaded):
-                    core.loadPlanets(datadir+"coords_planets.txt", planets)
+                    Data.loadPlanets(DATADIR+"coords_planets.txt", planets)
                     planets_loaded = True
-                map.makeMap(playername, explorations, planets)
-            elif (core.oneIn(savewords, Strlist)):
-                core.save(playername, explorations, None)
-            elif (core.oneIn(viewwords, Strlist)):
-                os.system(map.getMapFilename(playername))
-            elif (core.oneIn(exitwords, Strlist)):
+                Map.makeMap(playername, explorations, planets)
+            elif (Core.oneIn(savewords, Strlist)):
+                Data.save(playername, explorations, None)
+            elif (Core.oneIn(viewwords, Strlist)):
+                os.system(Map.getMapFilename(playername))
+            elif (Core.oneIn(exitwords, Strlist)):
                 pass #nothing to do
             elif ("zone" in Strlist):
                 Strlist.remove("zone")
@@ -102,16 +106,16 @@ try:
                     for y in xrange(y1, y2+1):
                         try:
                             if (b):
-                                core.remove(explorations, x, y)
+                                Data.remove(explorations, x, y)
                             else:
-                                core.add(explorations, x, y)
+                                Data.add(explorations, x, y)
                         except ValueError, e:
                             print e
                         except Exception, e:
                             traceback.print_exc()
-            elif (core.oneIn(planet_names, Strlist)):
+            elif (Core.oneIn(planet_names, Strlist)):
                 if (not planets_loaded):
-                    core.loadPlanets(datadir+"coords_planets.txt", planets)
+                    Data.loadPlanets(DATADIR+"coords_planets.txt", planets)
                     planets_loaded = True
                 name = ""
                 for planetname in planet_names:
@@ -123,7 +127,7 @@ try:
                 if ("d" in Strlist):
                     for (x, y) in planets[name]:
                         try:
-                            core.remove(explorations, x, y)
+                            Data.remove(explorations, x, y)
                         except ValueError, e:
                             print e
                         except Exception, e:
@@ -131,7 +135,7 @@ try:
                 else:
                     for (x, y) in planets[name]:
                         try:
-                            core.add(explorations, x, y)
+                            Data.add(explorations, x, y)
                         except ValueError, e:
                             print e
                         except Exception, e:
@@ -145,9 +149,9 @@ try:
                 y = int(y)
                 try:
                     if (b):
-                        core.remove(explorations, x, y)
+                        Data.remove(explorations, x, y)
                     else:
-                        core.add(explorations, x, y)
+                        Data.add(explorations, x, y)
                 except ValueError, e:
                     print e
                 except Exception, e:

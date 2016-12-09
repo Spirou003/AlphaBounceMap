@@ -2,7 +2,7 @@ import os
 import traceback
 from PIL import Image, ImageColor, ImageDraw
 
-import core
+import Core, Data
 
 def getplanetcoords(planets, coords):
     if ("planets" in coords):
@@ -28,14 +28,14 @@ def getnamefrom_coords_name_txt(filename, coords, txt):
 def loadcoords(coords):
     patternbegin = "coords_"
     patternend = ".txt"
-    filenames = os.listdir(core.datadir)
+    filenames = os.listdir(Core.DATADIR)
     for filename in filenames:
         name = getnamefrom_coords_name_txt(filename, "coords_", ".txt")
         if (name != None and name != "planets" and name not in coords):
-            coords[name] = core.readcoordsfile(core.datadir+os.sep+filename)
+            coords[name] = Data.readcoordsfile(Core.DATADIR+filename)
 #
 def getcolorsconfig():
-    sections = core.readconfigfile("colors.ini")
+    sections = Core.readconfigfile("colors.ini")
     if ("example" in sections):
         del sections["example"]
     if ("display" in sections):
@@ -91,7 +91,7 @@ def getcolorsconfig():
     return (newsections, axescolor, draworder)
 #
 def getMapFilename(playername):
-    return core.prefix(playername)+".png"
+    return Data.prefix(playername)+".png"
 #
 def gridlimits(xmin, xmax, ymin, ymax, x, y):
     if (x < xmin):
@@ -181,8 +181,8 @@ def drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax,
     #draw each remaining objective
     objectifs_copy = objectifs.copy()
     for key in coords:
-        core.removefromlist(objectifs_copy, coords[key])
-        core.removefromlist(objectifs_copy, explorations)
+        Core.removefromlist(objectifs_copy, coords[key])
+        Core.removefromlist(objectifs_copy, explorations)
     color = colors["background"]["onobjective"]
     for (x, y) in objectifs_copy:
         image.putpixel((x-xmin, y-ymin), color)
@@ -196,8 +196,8 @@ def makeMap(playername, explorations, planets):
         getplanetcoords(planets, coords)
         loadcoords(coords)
         objectifs = set()
-        if (os.path.isfile(core.prefix(playername)+".objectifs.txt")):
-            objectifs = core.readcoordsfile(core.prefix(playername)+".objectifs.txt")
+        if (os.path.isfile(Data.prefix(playername)+".objectifs.txt")):
+            objectifs = Data.readcoordsfile(Data.prefix(playername)+".objectifs.txt")
         (xmin, xmax, ymin, ymax) = getgridlimits(explorations, coords, objectifs)
         drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax, colors, draworder, axescolor)
     except Exception, e:

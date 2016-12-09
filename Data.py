@@ -1,12 +1,14 @@
 import os
 import traceback
-from PIL import Image, ImageColor, ImageDraw
+
+import Core
 
 SEP = "."
-datadir = "data"+os.sep
+SAVEDIR = "saves"+os.sep
 
-if (not os.path.isdir("saves")):
-    os.mkdir("saves")
+#
+def prefix(playername):
+    return SAVEDIR+playername
 #
 def readcoordsfile(filename, mode = "r"):
     file = open(filename, mode)
@@ -26,48 +28,6 @@ def readcoordsfile(filename, mode = "r"):
             coords.add((int(Line[0]),int(Line[1])))
     file.close()
     return coords
-#
-def readconfigfile(filename):
-    file = open(datadir+os.sep+filename, "r")
-    sections = {}
-    currentsection = None
-    for oline in file:
-        line = oline.strip().lower()
-        if (len(line) == 0):
-            continue
-        N = len(line)
-        if (oline[0] == "[" and line[N-1] == "]"):
-            sectionname = line[1:N-1]
-            if (sectionname in sections):
-                currentsection = sections[sectionname]
-            else:
-                currentsection = {}
-                sections[sectionname] = currentsection
-        elif ("=" in line):
-            pos = line.find("=")
-            key = line[:pos].strip()
-            value = line[pos+1:].strip()
-            currentsection[key] = value
-        else:
-            #ignore line
-            pass
-    return sections
-#
-def isforbidden(pseudo):
-    return (not pseudo.isalnum())
-#
-def removefromlist(collection, toremove):
-    for el in toremove:
-        if (el in collection):
-            collection.remove(el)
-#
-def search(x, y, explorations):
-    i = 0
-    for el in explorations:
-        if (el[0] == x and el[1] == y):
-            return i
-        i += 1
-    return None
 #
 def add(explorations, x, y):
     if ((x, y) not in explorations):
@@ -89,26 +49,12 @@ def save(playername, explorations, lastentered):
         file.write(str(el[0])+SEP+str(el[1])+"\n")
     file.close()
 #
-def prefix(playername):
-    return "saves"+os.sep+playername
-#
 def load(playername):
     filename = prefix(playername)+".txt"
     mode = "r+"
     if (not os.path.exists(filename)):
         mode = "w+"
     return readcoordsfile(filename, mode)
-#
-def loadWords(filename):
-    try:
-        file = open(filename, "r")
-        words = []
-        for line in file:
-            words.append(line.strip().lower())
-        file.close()
-        return words
-    except Exception, e:
-        return []
 #
 def loadPlanets(filename, planets):
     file = open(filename, "r")
@@ -123,8 +69,4 @@ def loadPlanets(filename, planets):
     file.close()
     return planets
 #
-def oneIn(list, string):
-    for name in list:
-        if name in string:
-            return True
-    return False
+
