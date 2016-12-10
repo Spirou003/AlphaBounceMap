@@ -1,11 +1,10 @@
 import os
 import traceback
 
-DATADIR = "config"+os.sep
+CONFIGDIR = "config"+os.sep
 
-#
 def readconfigfile(filename):
-    file = open(DATADIR+filename, "r")
+    file = open(CONFIGDIR+filename, "r")
     sections = {}
     currentsection = None
     for oline in file:

@@ -4,15 +4,6 @@ from PIL import Image, ImageColor, ImageDraw
 
 import Core, Data
 
-def getplanetcoords(planets, coords):
-    if ("planets" in coords):
-        return
-    planetscoords = set()
-    for planetname in planets:
-        for (x, y) in planets[planetname]:
-            planetscoords.add((x, y))
-    coords["planets"] = planetscoords
-#
 def getnamefrom_coords_name_txt(filename, coords, txt):
     if (len(filename) <= len(coords)+len(txt)):
         return None
@@ -25,17 +16,27 @@ def getnamefrom_coords_name_txt(filename, coords, txt):
             return None
     return filename[len(coords):len(filename)-len(txt)]
 #
-def loadcoords(coords):
+def loadcoords(planets):
+    coords = {}
+    #load planets
+    planetscoords = set()
+    for planetname in planets:
+        for (x, y) in planets[planetname]:
+            planetscoords.add((x, y))
+    coords["planets"] = planetscoords
+    #load other coords (missiles, asteroids and eventually others)
     patternbegin = "coords_"
     patternend = ".txt"
-    filenames = os.listdir(Core.DATADIR)
+    filenames = os.listdir(Core.CONFIGDIR)
     for filename in filenames:
         name = getnamefrom_coords_name_txt(filename, "coords_", ".txt")
         if (name != None and name != "planets" and name not in coords):
-            coords[name] = Data.readcoordsfile(Core.DATADIR+filename)
+            coords[name] = Data.readcoordsfile(Core.CONFIGDIR+filename)
+    return coords
 #
 def getcolorsconfig():
     sections = Core.readconfigfile("colors.ini")
+    #apply specific treatments for special sections
     if ("example" in sections):
         del sections["example"]
     if ("display" in sections):
@@ -43,7 +44,7 @@ def getcolorsconfig():
         del sections["display"]
     newsections = {}
     refs = []
-    #interpret config file to have only integers
+    #first pass: get colors from each line, if possible
     for sectionname in sections:
         configs = sections[sectionname]
         newconfigs = {}
@@ -66,7 +67,7 @@ def getcolorsconfig():
                 pass
         newsections[sectionname] = newconfigs
     oldreflen = -1
-    #resolve as many cross-references as possible
+    #second pass: resolve as many cross-references as possible
     while (len(refs) != 0 and len(refs) != oldreflen):
         i = 0
         oldreflen = len(refs)
@@ -80,11 +81,12 @@ def getcolorsconfig():
             except Exception, e:
                 #not added yet, or impossible to add => do nothing
                 pass
+    #remove remaining special section if it is (I do it here to use previous useful treatment for it)
     axescolor = {"main":(255,255,0,92),"secondary":(255,255,255,32)}
     if ("axes" in newsections):
         axescolor = newsections["axes"]
         del newsections["axes"]
-    #we need to have all config names for drawing, get missings if there are
+    #third pass: we need to have all config names for drawing, get missings if there are
     for key in newsections:
         if (key not in draworder):
             draworder.append(key)
@@ -190,18 +192,13 @@ def drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax,
     image.save(getMapFilename(playername), "PNG")
 #
 def makeMap(playername, explorations, planets):
-    try:
-        (colors, axescolor, draworder) = getcolorsconfig()
-        coords = {}
-        getplanetcoords(planets, coords)
-        loadcoords(coords)
-        objectifs = set()
-        if (os.path.isfile(Data.prefix(playername)+".objectifs.txt")):
-            objectifs = Data.readcoordsfile(Data.prefix(playername)+".objectifs.txt")
-        (xmin, xmax, ymin, ymax) = getgridlimits(explorations, coords, objectifs)
-        drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax, colors, draworder, axescolor)
-    except Exception, e:
-        traceback.print_exc()
+    (colors, axescolor, draworder) = getcolorsconfig()
+    coords = loadcoords(planets)
+    objectifs = set()
+    if (os.path.isfile(Data.prefix(playername)+".objectifs.txt")):
+        objectifs = Data.readcoordsfile(Data.prefix(playername)+".objectifs.txt")
+    (xmin, xmax, ymin, ymax) = getgridlimits(explorations, coords, objectifs)
+    drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax, colors, draworder, axescolor)
 #
 
 

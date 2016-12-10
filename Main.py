@@ -4,32 +4,35 @@ import traceback
 
 import Core, Map, Data
 
-DATADIR = Core.DATADIR
+CONFIGDIR = Core.CONFIGDIR
 SAVEDIR = Data.SAVEDIR
 
-if (not os.path.isdir("saves")):
-    os.mkdir("saves")
+if (not os.path.isdir(CONFIGDIR)):
+    print("Impossible de demarrer: le dossier "+CONFIGDIR+" est manquant.")
+    system.exit(0)
+if (not os.path.isdir(SAVEDIR)):
+    os.mkdir(SAVEDIR)
 
-planets = Data.loadPlanets(DATADIR+"coords_planets.txt")
+planets = Data.loadPlanets(CONFIGDIR+"coords_planets.txt")
 planet_names = planets.keys()
 reservedwords = ["zone", "d", "help"] + planet_names
 
-mapwords = Core.loadWords(DATADIR+"words_map.txt")
+mapwords = Core.loadWords(CONFIGDIR+"words_map.txt")
 Core.removefromlist(mapwords, reservedwords)
 if (len(mapwords) == 0):
     mapwords.append("map")
 
-savewords = Core.loadWords(DATADIR+"words_save.txt")
+savewords = Core.loadWords(CONFIGDIR+"words_save.txt")
 Core.removefromlist(savewords, reservedwords)
 if (len(savewords) == 0):
     savewords.append("save")
 
-viewwords = Core.loadWords(DATADIR+"words_view.txt")
+viewwords = Core.loadWords(CONFIGDIR+"words_view.txt")
 Core.removefromlist(viewwords, reservedwords)
 if (len(viewwords) == 0):
     viewwords.append("view")
 
-exitwords = Core.loadWords(DATADIR+"words_exit.txt")
+exitwords = Core.loadWords(CONFIGDIR+"words_exit.txt")
 Core.removefromlist(exitwords, reservedwords)
 exitwords_reserved = ("quit", "exit")
 for exit_word in exitwords_reserved:
