@@ -33,54 +33,35 @@ def explore(explorations, x, y):
     if ((x, y) not in explorations):
         explorations.add((x, y))
     else:
-        raise ValueError("("+str(x)+" "+str(y)+") est deja explore")
+        print("("+str(x)+" "+str(y)+") est deja explore")
 #
 def unexplore(explorations, x, y):
     if ((x, y) not in explorations):
-        raise ValueError("("+str(x)+" "+str(y)+") n'est pas encore explore")
-    explorations.remove((x, y))
+        print("("+str(x)+" "+str(y)+") n'est pas encore explore")
+    else:
+        explorations.remove((x, y))
 #
 def explorezone(explorations, x1, y1, x2, y2):    
     (x1, x2) = (min(x1, x2), max(x1, x2))
     (y1, y2) = (min(y1, y2), max(y1, y2))
     for x in xrange(x1, x2+1):
         for y in xrange(y1, y2+1):
-            try:
-                explore(explorations, x, y)
-            except ValueError, e:
-                print e
-            except Exception, e:
-                traceback.print_exc()
+            explore(explorations, x, y)
 #
 def unexplorezone(explorations, x1, y1, x2, y2):
     (x1, x2) = (min(x1, x2), max(x1, x2))
     (y1, y2) = (min(y1, y2), max(y1, y2))
     for x in xrange(x1, x2+1):
         for y in xrange(y1, y2+1):
-            try:
-                unexplore(explorations, x, y)
-            except ValueError, e:
-                print e
-            except Exception, e:
-                traceback.print_exc()
+            unexplore(explorations, x, y)
 #
 def exploreplanet(explorations, planets, planetname):
     for (x, y) in planets[planetname]:
-        try:
-            explore(explorations, x, y)
-        except ValueError, e:
-            print e
-        except Exception, e:
-            traceback.print_exc()
+        explore(explorations, x, y)
 #
 def unexploreplanet(explorations, planets, planetname):
     for (x, y) in planets[planetname]:
-        try:
-            unexplore(explorations, x, y)
-        except ValueError, e:
-            print e
-        except Exception, e:
-            traceback.print_exc()
+        unexplore(explorations, x, y)
 #
 def save(playername, explorations, lastentered):
     filename = prefix(playername)+".txt"

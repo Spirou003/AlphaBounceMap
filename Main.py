@@ -1,3 +1,4 @@
+#coding: utf-8
 import os, sys
 import traceback
 
@@ -90,7 +91,26 @@ try:
                 unexplore = ('d' in Strlist)
                 if (unexplore):
                     Strlist.remove("d")
+                if (len(Strlist) != 4):
+                    print('Commande incorrecte: "'+Str+'"')
+                    missing = 4-len(Strlist);
+                    if (missing < 0):
+                        print("Il y a "+str(-missing)+" argument(s) en trop.")
+                    else:
+                        print("Il manque "+str(missing)+" argument(s).")
+                    continue
                 (x1, y1, x2, y2) = Strlist
+                if (not (x1.isdigit() and x2.isdigit() and y1.isdigit() and y2.isdigit())):
+                    print('Commande incorrecte: "'+Str+'"')
+                    if (not x1.isdigit()):
+                        print("L'argument n°1 n'est pas un nombre entier.")
+                    if (not y1.isdigit()):
+                        print("L'argument n°2 n'est pas un nombre entier.")
+                    if (not x2.isdigit()):
+                        print("L'argument n°3 n'est pas un nombre entier.")
+                    if (not y2.isdigit()):
+                        print("L'argument n°4 n'est pas un nombre entier.")
+                    continue
                 x1 = int(x1)
                 y1 = int(y1)
                 x2 = int(x2)
@@ -116,18 +136,28 @@ try:
                 unexplore = ('d' in Strlist)
                 if (unexplore):
                     Strlist.remove("d")
+                if (len(Strlist) != 2):
+                    print('Commande incorrecte: "'+Str+'"')
+                    missing = 2-len(Strlist)
+                    if (missing < 0):
+                        print("Il y a "+str(-missing)+" argument(s) en trop.")
+                    else:
+                        print("Il manque "+str(missing)+" argument(s).")
+                    continue
                 (x, y) = Strlist
+                if (not (x.isdigit() and y.isdigit())):
+                    print('Commande incorrecte: "'+Str+'"')
+                    if (not x.isdigit()):
+                        print("L'argument n°1 n'est pas un nombre entier.")
+                    if (not y.isdigit()):
+                        print("L'argument n°2 n'est pas un nombre entier.")
+                    continue
                 x = int(x)
                 y = int(y)
-                try:
-                    if (unexplore):
-                        Data.unexplore(explorations, x, y)
-                    else:
-                        Data.explore(explorations, x, y)
-                except ValueError, e:
-                    print e
-                except Exception, e:
-                    traceback.print_exc()
+                if (unexplore):
+                    Data.unexplore(explorations, x, y)
+                else:
+                    Data.explore(explorations, x, y)
         except Exception, e:
             if (Str != ""):
                 traceback.print_exc()
