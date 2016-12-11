@@ -80,10 +80,10 @@ def save(playername, playerdata, lastentered):
 #
 def load(playername):
     def _load(filename):
-        mode = "r+"
         if (not os.path.exists(filename)):
-            mode = "w+"
-        return readcoordsfile(filename, mode)
+            return set()
+        else:
+            return readcoordsfile(filename, "r")
     return (_load(prefix(playername)+".txt"), _load(prefix(playername)+".objectifs.txt"))
 #
 def loadPlanets(filename):
