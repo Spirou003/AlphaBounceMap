@@ -1,7 +1,27 @@
+#coding: utf-8
 import os
-import traceback
+import sys
+
+from io import open
 
 CONFIGDIR = "config"+os.sep
+
+def getxrange():
+    """Tricky function to have a python 2-3 compatible xrange"""
+    if (sys.version_info[0] == 2):
+        return xrange
+    else:
+        return range
+#
+def getraw_input():
+    """Tricky function to have a python 2-3 compatible raw_input"""
+    if (sys.version_info[0] == 2):
+        return raw_input
+    else:
+        return input
+#
+xrange = getxrange()
+raw_input = getraw_input()
 
 def isint(string):
     if (string.isdigit()):
@@ -59,7 +79,7 @@ def loadWords(filename):
             words.add(line.strip().lower())
         file.close()
         return words
-    except Exception, e:
+    except Exception as e:
         return set()
 #
 def oneIn(list, string):

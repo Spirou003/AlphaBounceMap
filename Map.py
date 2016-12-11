@@ -1,8 +1,11 @@
+#coding: utf-8
 import os
 import traceback
 from PIL import Image, ImageColor, ImageDraw
 
 import Core, Data
+xrange = Core.getxrange()
+raw_input = Core.getraw_input()
 
 def getnamefrom_coords_name_txt(filename, coords, txt):
     if (len(filename) <= len(coords)+len(txt)):
@@ -57,7 +60,7 @@ def getcolorsconfig():
                 (r, g, b, a) = rgba
                 try:
                     newconfigs[configname] = (int(r), int(g), int(b), int(a))
-                except Exception, e:
+                except Exception as e:
                     #unknown format
                     pass
             elif (len(ext) == 2):
@@ -78,7 +81,7 @@ def getcolorsconfig():
                     newsections[sectionname][configname] = newsections[extsection][extconfig]
                     refs.pop(i)
                     i = oldreflen
-            except Exception, e:
+            except Exception as e:
                 #not added yet, or impossible to add => do nothing
                 pass
     #remove remaining special section if it is (I do it here to use previous useful treatment for it)
@@ -198,5 +201,4 @@ def makeMap(playername, playerdata, planets):
     (xmin, xmax, ymin, ymax) = getgridlimits(explorations, coords, objectifs)
     drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax, colors, draworder, axescolor)
 #
-
 

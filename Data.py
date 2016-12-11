@@ -1,5 +1,12 @@
+#coding: utf-8
 import os
 import traceback
+
+from io import open
+from Core import getxrange, getraw_input
+xrange = getxrange()
+raw_input = getraw_input()
+
 
 SEP = "."
 SAVEDIR = "saves"+os.sep
@@ -66,7 +73,7 @@ def unexploreplanet(playerdata, planets, planetname):
     for (x, y) in planets[planetname]:
         unexplore(playerdata, x, y)
 #
-def save(playername, playerdata, lastentered):
+def save(playername, playerdata):
     filename = prefix(playername)+".txt"
     def _save(filename, coords):
         file = open(filename, "w+")
@@ -95,7 +102,7 @@ def loadPlanets(filename):
             Line = line.strip().split(SEP)
             (x, y) = (int(Line[0]),int(Line[1]))
             current.add((x, y))
-        except ValueError, e:
+        except ValueError as e:
             name = line.strip()
             if (name in planets):
                 current = planets[name]
