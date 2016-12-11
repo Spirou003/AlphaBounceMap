@@ -191,12 +191,10 @@ def drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax,
     drawgrid(image, axescolor, xmin, xmax, ymin, ymax)
     image.save(getMapFilename(playername), "PNG")
 #
-def makeMap(playername, explorations, planets):
+def makeMap(playername, playerdata, planets):
+    (explorations, objectifs) = playerdata
     (colors, axescolor, draworder) = getcolorsconfig()
     coords = loadcoords(planets)
-    objectifs = set()
-    if (os.path.isfile(Data.prefix(playername)+".objectifs.txt")):
-        objectifs = Data.readcoordsfile(Data.prefix(playername)+".objectifs.txt")
     (xmin, xmax, ymin, ymax) = getgridlimits(explorations, coords, objectifs)
     drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax, colors, draworder, axescolor)
 #

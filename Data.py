@@ -1,11 +1,11 @@
 import os
 import traceback
 
-import Core
-
 SEP = "."
 SAVEDIR = "saves"+os.sep
 
+def printablecoords(x, y):
+    return "("+str(x)+" : "+str(y)+")"
 #
 def prefix(playername):
     return SAVEDIR+playername
@@ -29,55 +29,62 @@ def readcoordsfile(filename, mode = "r"):
     file.close()
     return coords
 #
-def explore(explorations, x, y):
-    if ((x, y) not in explorations):
-        explorations.add((x, y))
+def explore(playerdata, x, y):
+    if ((x, y) not in playerdata[0]):
+        playerdata[0].add((x, y))
     else:
-        print("("+str(x)+" "+str(y)+") est deja explore")
+        print(printablecoords(x, y)+" est deja explore")
+    if ((x, y) in playerdata[1]):
+        playerdata[1].remove((x, y))
+        print("Objectif atteint: "+printablecoords(x, y))
 #
-def unexplore(explorations, x, y):
-    if ((x, y) not in explorations):
-        print("("+str(x)+" "+str(y)+") n'est pas encore explore")
+def unexplore(playerdata, x, y):
+    if ((x, y) not in playerdata[0]):
+        print(printablecoords(x, y)+" n'est pas encore explore")
     else:
-        explorations.remove((x, y))
+        playerdata[0].remove((x, y))
 #
-def explorezone(explorations, x1, y1, x2, y2):    
+def explorezone(playerdata, x1, y1, x2, y2):    
     (x1, x2) = (min(x1, x2), max(x1, x2))
     (y1, y2) = (min(y1, y2), max(y1, y2))
     for x in xrange(x1, x2+1):
         for y in xrange(y1, y2+1):
-            explore(explorations, x, y)
+            explore(playerdata, x, y)
 #
-def unexplorezone(explorations, x1, y1, x2, y2):
+def unexplorezone(playerdata, x1, y1, x2, y2):
     (x1, x2) = (min(x1, x2), max(x1, x2))
     (y1, y2) = (min(y1, y2), max(y1, y2))
     for x in xrange(x1, x2+1):
         for y in xrange(y1, y2+1):
-            unexplore(explorations, x, y)
+            unexplore(playerdata, x, y)
 #
 def exploreplanet(explorations, planets, planetname):
     for (x, y) in planets[planetname]:
         explore(explorations, x, y)
 #
-def unexploreplanet(explorations, planets, planetname):
+def unexploreplanet(playerdata, planets, planetname):
     for (x, y) in planets[planetname]:
-        unexplore(explorations, x, y)
+        unexplore(playerdata, x, y)
 #
-def save(playername, explorations, lastentered):
+def save(playername, playerdata, lastentered):
     filename = prefix(playername)+".txt"
-    file = open(filename, "w+")
-    explorations_list = list(explorations)
-    explorations_list.sort()
-    for el in explorations_list:
-        file.write(str(el[0])+SEP+str(el[1])+"\n")
-    file.close()
+    def _save(filename, coords):
+        file = open(filename, "w+")
+        coords_list = list(coords)
+        coords_list.sort()
+        for el in coords_list:
+            file.write(str(el[0])+SEP+str(el[1])+"\n")
+        file.close()
+    _save(prefix(playername)+".txt", playerdata[0])
+    _save(prefix(playername)+".objectifs.txt", playerdata[1])
 #
 def load(playername):
-    filename = prefix(playername)+".txt"
-    mode = "r+"
-    if (not os.path.exists(filename)):
-        mode = "w+"
-    return readcoordsfile(filename, mode)
+    def _load(filename):
+        mode = "r+"
+        if (not os.path.exists(filename)):
+            mode = "w+"
+        return readcoordsfile(filename, mode)
+    return (_load(prefix(playername)+".txt"), _load(prefix(playername)+".objectifs.txt"))
 #
 def loadPlanets(filename):
     file = open(filename, "r")
