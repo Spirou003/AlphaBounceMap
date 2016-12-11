@@ -103,15 +103,15 @@ try:
                         print("Il manque "+str(missing)+" argument(s).")
                     continue
                 (x1, y1, x2, y2) = Strlist
-                if (not (x1.isdigit() and x2.isdigit() and y1.isdigit() and y2.isdigit())):
+                if (not (Core.isint(x1) and Core.isint(x2) and Core.isint(y1) and Core.isint(y2))):
                     print('Commande incorrecte: "'+Str+'"')
-                    if (not x1.isdigit()):
+                    if (not Core.isint(x1)):
                         print("L'argument n°1 n'est pas un nombre entier.")
-                    if (not y1.isdigit()):
+                    if (not Core.isint(y1)):
                         print("L'argument n°2 n'est pas un nombre entier.")
-                    if (not x2.isdigit()):
+                    if (not Core.isint(x2)):
                         print("L'argument n°3 n'est pas un nombre entier.")
-                    if (not y2.isdigit()):
+                    if (not Core.isint(y2)):
                         print("L'argument n°4 n'est pas un nombre entier.")
                     continue
                 x1 = int(x1)
@@ -148,11 +148,11 @@ try:
                         print("Il manque "+str(missing)+" argument(s).")
                     continue
                 (x, y) = Strlist
-                if (not (x.isdigit() and y.isdigit())):
+                if (not (Core.isint(x) and Core.isint(y))):
                     print('Commande incorrecte: "'+Str+'"')
-                    if (not x.isdigit()):
+                    if (not Core.isint(x)):
                         print("L'argument n°1 n'est pas un nombre entier.")
-                    if (not y.isdigit()):
+                    if (not Core.isint(y)):
                         print("L'argument n°2 n'est pas un nombre entier.")
                     continue
                 x = int(x)

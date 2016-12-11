@@ -3,6 +3,12 @@ import traceback
 
 CONFIGDIR = "config"+os.sep
 
+def isint(string):
+    if (string.isdigit()):
+        return True
+    else:
+        return (string[0] == "-" and string[1:].isdigit())
+#
 def readconfigfile(filename):
     file = open(CONFIGDIR+filename, "r")
     sections = {}
