@@ -54,13 +54,13 @@ def search(x, y, explorations):
 def loadWords(filename):
     try:
         file = open(filename, "r")
-        words = []
+        words = set()
         for line in file:
-            words.append(line.strip().lower())
+            words.add(line.strip().lower())
         file.close()
         return words
     except Exception, e:
-        return []
+        return set()
 #
 def oneIn(list, string):
     for name in list:
