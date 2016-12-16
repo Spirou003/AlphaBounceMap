@@ -36,42 +36,22 @@ def readcoordsfile(filename, mode = "r"):
     file.close()
     return coords
 #
-def explore(playerdata, x, y):
-    if ((x, y) not in playerdata[0]):
-        playerdata[0].add((x, y))
-    else:
-        print(printablecoords(x, y)+" est deja explore")
-    if ((x, y) in playerdata[1]):
-        playerdata[1].remove((x, y))
-        print("Objectif atteint: "+printablecoords(x, y))
+def explore(playerdata, coords):
+    for (x, y) in coords:
+        if ((x, y) not in playerdata[0]):
+            playerdata[0].add((x, y))
+        else:
+            print(printablecoords(x, y)+" est deja explore")
+        if ((x, y) in playerdata[1]):
+            playerdata[1].remove((x, y))
+            print("Objectif atteint: "+printablecoords(x, y))
 #
-def unexplore(playerdata, x, y):
-    if ((x, y) not in playerdata[0]):
-        print(printablecoords(x, y)+" n'est pas encore explore")
-    else:
-        playerdata[0].remove((x, y))
-#
-def explorezone(playerdata, x1, y1, x2, y2):    
-    (x1, x2) = (min(x1, x2), max(x1, x2))
-    (y1, y2) = (min(y1, y2), max(y1, y2))
-    for x in xrange(x1, x2+1):
-        for y in xrange(y1, y2+1):
-            explore(playerdata, x, y)
-#
-def unexplorezone(playerdata, x1, y1, x2, y2):
-    (x1, x2) = (min(x1, x2), max(x1, x2))
-    (y1, y2) = (min(y1, y2), max(y1, y2))
-    for x in xrange(x1, x2+1):
-        for y in xrange(y1, y2+1):
-            unexplore(playerdata, x, y)
-#
-def exploreplanet(explorations, planets, planetname):
-    for (x, y) in planets[planetname]:
-        explore(explorations, x, y)
-#
-def unexploreplanet(playerdata, planets, planetname):
-    for (x, y) in planets[planetname]:
-        unexplore(playerdata, x, y)
+def unexplore(playerdata, coords):
+    for (x, y) in coords:
+        if ((x, y) not in playerdata[0]):
+            print(printablecoords(x, y)+" n'est pas encore explore")
+        else:
+            playerdata[0].remove((x, y))
 #
 def save(playername, playerdata):
     filename = prefix(playername)+".txt"
