@@ -109,7 +109,7 @@ def gridlimits(xmin, xmax, ymin, ymax, x, y):
         ymax = y
     return (xmin, xmax, ymin, ymax)
 #
-def getgridlimits(explorations, coords, objectifs):
+def getgridlimits(explorations, coords, target):
     (xmin, xmax, ymin, ymax) = (0, 0, 0, 0)
     for el in explorations:
         (x, y) = el
@@ -117,7 +117,7 @@ def getgridlimits(explorations, coords, objectifs):
     for key in coords:
         for (x, y) in coords[key]:
             (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
-    for (x, y) in objectifs:
+    for (x, y) in target:
         (xmin, xmax, ymin, ymax) = gridlimits(xmin, xmax, ymin, ymax, x, y)
     xmin -= 5
     xmax += 5
@@ -160,45 +160,45 @@ def putpixel(image, x, y, color):
     a = int(255*(1-(1-newpixa)*(1-oldpixa)))
     image.putpixel((x, y), (r, g, b, a))
 #
-def drawlist(keylist, image, xmin, xmax, ymin, ymax, colors, explorations, objectifs):
+def drawlist(keylist, image, xmin, xmax, ymin, ymax, colors, explorations, target):
     for (x, y) in keylist:
-        if ((x, y) in objectifs):
-            putpixel(image, x-xmin, y-ymin, colors["onobjective"])
+        if ((x, y) in target):
+            putpixel(image, x-xmin, y-ymin, colors["ontarget"])
         elif ((x, y) in explorations):
             putpixel(image, x-xmin, y-ymin, colors["onexplore"])
         else:
             putpixel(image, x-xmin, y-ymin, colors["default"])
 #
-def drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax, colors, draworder, axescolor):
+def drawmap(playername, explorations, coords, target, xmin, xmax, ymin, ymax, colors, draworder, axescolor):
     image = Image.new("RGBA", (xmax-xmin+1, ymax-ymin+1), colors["background"]["default"])
     #draw explorations
     for (x, y) in explorations:
         color = None
-        if ((x, y) in objectifs):
-            color = colors["background"]["onobjective"]
+        if ((x, y) in target):
+            color = colors["background"]["ontarget"]
         else:
             color = colors["background"]["onexplore"]
         image.putpixel((x-xmin, y-ymin), color)
     #draw entities (planets, asteroids, ...)
     for key in draworder:
         if (key in coords):
-            drawlist(coords[key], image, xmin, xmax, ymin, ymax, colors[key], explorations, objectifs)
-    #draw each remaining objective
-    objectifs_copy = objectifs.copy()
+            drawlist(coords[key], image, xmin, xmax, ymin, ymax, colors[key], explorations, target)
+    #draw each remaining target
+    target_copy = target.copy()
     for key in coords:
-        Core.removefromlist(objectifs_copy, coords[key])
-        Core.removefromlist(objectifs_copy, explorations)
-    color = colors["background"]["onobjective"]
-    for (x, y) in objectifs_copy:
+        Core.removefromlist(target_copy, coords[key])
+        Core.removefromlist(target_copy, explorations)
+    color = colors["background"]["ontarget"]
+    for (x, y) in target_copy:
         image.putpixel((x-xmin, y-ymin), color)
     drawgrid(image, axescolor, xmin, xmax, ymin, ymax)
     image.save(getMapFilename(playername), "PNG")
 #
 def makeMap(playername, playerdata, planets):
-    (explorations, objectifs) = playerdata
+    (explorations, target) = playerdata
     (colors, axescolor, draworder) = getcolorsconfig()
     coords = loadcoords(planets)
-    (xmin, xmax, ymin, ymax) = getgridlimits(explorations, coords, objectifs)
-    drawmap(playername, explorations, coords, objectifs, xmin, xmax, ymin, ymax, colors, draworder, axescolor)
+    (xmin, xmax, ymin, ymax) = getgridlimits(explorations, coords, target)
+    drawmap(playername, explorations, coords, target, xmin, xmax, ymin, ymax, colors, draworder, axescolor)
 #
 

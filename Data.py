@@ -36,7 +36,7 @@ def readcoordsfile(filename, mode = "r"):
     file.close()
     return coords
 #
-def mark(playerdata, coords, remarkmsg, objectivemsg):
+def mark(playerdata, coords, remarkmsg, targetmsg):
     for (x, y) in coords:
         if ((x, y) not in playerdata[0]):
             playerdata[0].add((x, y))
@@ -44,7 +44,7 @@ def mark(playerdata, coords, remarkmsg, objectivemsg):
             print(remarkmsg(printablecoords(x, y)))
         if ((x, y) in playerdata[1]):
             playerdata[1].remove((x, y))
-            print(objectivemsg(printablecoords(x, y)))
+            print(targetmsg(printablecoords(x, y)))
 #
 def unmark(playerdata, coords, reunmarkmsg):
     for (x, y) in coords:
@@ -59,10 +59,10 @@ def explore(playerdata, coords):
 def unexplore(playerdata, coords):
     unmark(playerdata, coords, lambda w:str(w)+" n'est pas encore explore")
 #
-def addobjective(playerdata, coords):
+def addtarget(playerdata, coords):
     mark((playerdata[1],[]), coords, lambda w:str(w)+" est deja un objectif",lambda w:"Erreur: cela ne doit jamais arriver!!!")
 #
-def delobjective(playerdata, coords):
+def deltarget(playerdata, coords):
     unmark((playerdata[1],[]), coords, lambda w:str(w)+" n'etait pas un objectif")
 #
 def save(playername, playerdata):

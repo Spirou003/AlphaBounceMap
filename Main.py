@@ -36,10 +36,10 @@ def Main():
     if (len(viewwords) == 0):
         viewwords.append("view")
 
-    objectivewords = Core.loadWords(CONFIGDIR+"words_objective.txt")
-    Core.removefromlist(objectivewords, reservedwords)
-    if (len(objectivewords) == 0):
-        objectivewords.append("objective")
+    targetwords = Core.loadWords(CONFIGDIR+"words_target.txt")
+    Core.removefromlist(targetwords, reservedwords)
+    if (len(targetwords) == 0):
+        targetwords.append("target")
 
     exitwords = Core.loadWords(CONFIGDIR+"words_exit.txt")
     Core.removefromlist(exitwords, reservedwords)
@@ -59,7 +59,7 @@ def Main():
         sys.exit(0)
     elif (playername in exitwords_reserved):
         sys.exit(0)
-    explorations = Data.load(playername)
+    playerdata = Data.load(playername)
     Str = ""
     Strlist = []
     print('Tapez "help" pour obtenir de l\'aide')
@@ -93,12 +93,12 @@ def Main():
                             tempstring = " ".join(Strlist)
                             print('Aucune commande du nom de "'+tempstring+'"')
                 elif (Core.oneIn(mapwords, Strlist)):
-                    Map.makeMap(playername, explorations, planets)
+                    Map.makeMap(playername, playerdata, planets)
                 elif (Core.oneIn(savewords, Strlist)):
-                    Data.save(playername, explorations)
+                    Data.save(playername, playerdata)
                 elif (Core.oneIn(viewwords, Strlist)):
                     os.system(Map.getMapFilename(playername))
-                elif (Core.oneIn(objectivewords, Strlist)):
+                elif (Core.oneIn(targetwords, Strlist)):
                     print('Entrez votre nouvel objectif:')
                     while (not Core.oneIn(exitwords, Strlist)):
                         Str = raw_input("==> ").strip().lower()
@@ -110,18 +110,18 @@ def Main():
                         else:
                             (coords, explore) = parsecoords(Str, Strlist, planet_names, planets)
                             if (explore):
-                                Data.addobjective(explorations, coords)
+                                Data.addtarget(playerdata, coords)
                             else:
-                                Data.delobjective(explorations, coords)
+                                Data.deltarget(playerdata, coords)
                     Strlist = [] #don't exit immediately after that
                 elif (Core.oneIn(exitwords, Strlist)):
                     pass #nothing to do
                 else:
                     (coords, explore) = parsecoords(Str, Strlist, planet_names, planets)
                     if (explore):
-                        Data.explore(explorations, coords)
+                        Data.explore(playerdata, coords)
                     else:
-                        Data.unexplore(explorations, coords)
+                        Data.unexplore(playerdata, coords)
             except Exception as e:
                 traceback.print_exc()
     except KeyboardInterrupt as e:
