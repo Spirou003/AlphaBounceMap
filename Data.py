@@ -36,22 +36,34 @@ def readcoordsfile(filename, mode = "r"):
     file.close()
     return coords
 #
-def explore(playerdata, coords):
+def mark(playerdata, coords, remarkmsg, objectivemsg):
     for (x, y) in coords:
         if ((x, y) not in playerdata[0]):
             playerdata[0].add((x, y))
         else:
-            print(printablecoords(x, y)+" est deja explore")
+            print(remarkmsg(printablecoords(x, y)))
         if ((x, y) in playerdata[1]):
             playerdata[1].remove((x, y))
-            print("Objectif atteint: "+printablecoords(x, y))
+            print(objectivemsg(printablecoords(x, y)))
 #
-def unexplore(playerdata, coords):
+def unmark(playerdata, coords, reunmarkmsg):
     for (x, y) in coords:
         if ((x, y) not in playerdata[0]):
-            print(printablecoords(x, y)+" n'est pas encore explore")
+            print(reunmarkmsg(printablecoords(x, y)))
         else:
             playerdata[0].remove((x, y))
+#
+def explore(playerdata, coords):
+    mark(playerdata, coords, lambda w:str(w)+" est deja explore",lambda w:"Objectif atteint: "+str(w))
+#
+def unexplore(playerdata, coords):
+    unmark(playerdata, coords, lambda w:str(w)+" n'est pas encore explore")
+#
+def addobjective(playerdata, coords):
+    mark((playerdata[1],[]), coords, lambda w:str(w)+" est deja un objectif",lambda w:"Erreur: cela ne doit jamais arriver!!!")
+#
+def delobjective(playerdata, coords):
+    unmark((playerdata[1],[]), coords, lambda w:str(w)+" n'etait pas un objectif")
 #
 def save(playername, playerdata):
     filename = prefix(playername)+".txt"

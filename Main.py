@@ -36,6 +36,11 @@ def Main():
     if (len(viewwords) == 0):
         viewwords.append("view")
 
+    objectivewords = Core.loadWords(CONFIGDIR+"words_objective.txt")
+    Core.removefromlist(objectivewords, reservedwords)
+    if (len(objectivewords) == 0):
+        objectivewords.append("objective")
+
     exitwords = Core.loadWords(CONFIGDIR+"words_exit.txt")
     Core.removefromlist(exitwords, reservedwords)
     exitwords_reserved = ("quit", "exit")
@@ -93,6 +98,22 @@ def Main():
                     Data.save(playername, explorations)
                 elif (Core.oneIn(viewwords, Strlist)):
                     os.system(Map.getMapFilename(playername))
+                elif (Core.oneIn(objectivewords, Strlist)):
+                    print('Entrez votre nouvel objectif:')
+                    while (not Core.oneIn(exitwords, Strlist)):
+                        Str = raw_input("==> ").strip().lower()
+                        if (Str == ""):
+                            continue
+                        Strlist = Str.split(" ")
+                        if (Core.oneIn(exitwords, Strlist)):
+                            pass #nothing to do
+                        else:
+                            (coords, explore) = parsecoords(Str, Strlist, planet_names, planets)
+                            if (explore):
+                                Data.addobjective(explorations, coords)
+                            else:
+                                Data.delobjective(explorations, coords)
+                    Strlist = [] #don't exit immediately after that
                 elif (Core.oneIn(exitwords, Strlist)):
                     pass #nothing to do
                 else:
