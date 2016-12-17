@@ -61,6 +61,8 @@ def Main():
     try:
         while (not Core.oneIn(exitwords, Strlist)):
             Str = raw_input("> ").strip().lower()
+            if (Str == ""):
+                continue
             Strlist = Str.split(" ")
             try:
                 if ("help" in Strlist):
@@ -100,8 +102,7 @@ def Main():
                     else:
                         Data.unexplore(explorations, coords)
             except Exception as e:
-                if (Str != ""):
-                    traceback.print_exc()
+                traceback.print_exc()
     except KeyboardInterrupt as e:
         pass
     except Exception as e:
