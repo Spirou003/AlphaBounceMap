@@ -2,8 +2,6 @@
 import os
 import sys
 
-from io import open
-
 CONFIGDIR = "config"+os.sep
 
 def getxrange():

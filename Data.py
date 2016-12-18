@@ -2,7 +2,6 @@
 import os
 import traceback
 
-from io import open
 from Core import getxrange, getraw_input
 xrange = getxrange()
 raw_input = getraw_input()
