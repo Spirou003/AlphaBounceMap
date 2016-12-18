@@ -12,27 +12,28 @@ SEP = "."
 def printablecoords(x, y):
     return "("+str(x)+" : "+str(y)+")"
 #
+def parsecoordsline(line):
+    if ('[' == line[0]):
+        tmp = line[1:-1].split("] ... [")
+        (x1,y1) = tmp[0].split(",")
+        (x2,y2) = tmp[1].split("][")
+        (x1,x2,y1,y2) = (int(x1),int(x2),int(y1),int(y2))
+        return itertools.product(xrange(x1, x2+1), xrange(y1, y2+1))
+    else:
+        tmp = line.split(SEP)
+        return [(int(tmp[0]),int(tmp[1]))]
+#
 def readcoordsfile(filename, mode = "r"):
     if (not os.path.exists(filename)):
         return set()
     file = open(filename, mode)
     coords = set()
     for line in file:
-        Line = line.strip()
         try:
-            if ('[' == Line[0]):
-                tmp = Line[1:-1].split("] ... [")
-                (x1,y1) = tmp[0].split(",")
-                (x2,y2) = tmp[1].split("][")
-                (x1,x2,y1,y2) = (int(x1),int(x2),int(y1),int(y2))
-                for x in xrange(x1, x2+1):
-                    for y in xrange(y1, y2+1):
-                        coords.add((x, y))
-            else:
-                tmp = Line.split(SEP)
-                coords.add((int(tmp[0]),int(tmp[1])))
+            for (x, y) in parsecoordsline(line.strip()):
+                coords.add((x, y))
         except Exception as e:
-            print(str(filename)+": format invalide: "+Line)
+            print(str(filename)+": format invalide: "+line)
     file.close()
     return coords
 #
@@ -85,17 +86,20 @@ def loadPlanets(filename):
     planets = {}
     current = set()
     for line in file:
-        try:
-            Line = line.strip().split(SEP)
-            (x, y) = (int(Line[0]),int(Line[1]))
-            current.add((x, y))
-        except ValueError as e:
-            name = line.strip()
+        Line = line.strip()
+        if (Line[0] == "<" and Line[-1] == ">"):
+            name = line.strip()[1:-1]
             if (name in planets):
                 current = planets[name]
             else:
                 current = set()
                 planets[name] = current
+        else:
+            try:
+                for (x, y) in parsecoordsline(Line):
+                    current.add((x, y))
+            except Exception as e:
+                print(str(filename)+": format invalide: "+line)
     file.close()
     return planets
 #
