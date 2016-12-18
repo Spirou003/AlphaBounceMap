@@ -3,6 +3,7 @@ import os
 import sys
 
 CONFIGDIR = "config"+os.sep
+SAVEDIR = "saves"+os.sep
 
 def getxrange():
     """Tricky function to have a python 2-3 compatible xrange"""
@@ -21,6 +22,9 @@ def getraw_input():
 xrange = getxrange()
 raw_input = getraw_input()
 
+def prefix(playername):
+    return SAVEDIR+playername
+#
 def isint(string):
     if (string.isdigit()):
         return True
@@ -28,7 +32,9 @@ def isint(string):
         return (string[0] == "-" and string[1:].isdigit())
 #
 def readconfigfile(filename):
-    file = open(CONFIGDIR+filename, "r")
+    if (not os.path.exists(filename)):
+        return {}
+    file = open(filename, "r")
     sections = {}
     currentsection = None
     for oline in file:
@@ -51,6 +57,7 @@ def readconfigfile(filename):
         else:
             #ignore line
             pass
+    file.close()
     return sections
 #
 def isforbidden(pseudo):
@@ -61,23 +68,15 @@ def removefromlist(collection, toremove):
         if (el in collection):
             collection.remove(el)
 #
-def search(x, y, explorations):
-    i = 0
-    for el in explorations:
-        if (el[0] == x and el[1] == y):
-            return i
-        i += 1
-    return None
-#
 def loadWords(filename):
-    try:
+    if (os.path.exists(filename)):
         file = open(filename, "r")
         words = set()
         for line in file:
             words.add(line.strip().lower())
         file.close()
         return words
-    except Exception as e:
+    else:
         return set()
 #
 def oneIn(list, string):

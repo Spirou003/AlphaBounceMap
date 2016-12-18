@@ -2,36 +2,37 @@
 import os
 import traceback
 
-from Core import getxrange, getraw_input
-xrange = getxrange()
-raw_input = getraw_input()
+import Core
+xrange = Core.getxrange()
+raw_input = Core.getraw_input()
 
 
 SEP = "."
-SAVEDIR = "saves"+os.sep
 
 def printablecoords(x, y):
     return "("+str(x)+" : "+str(y)+")"
 #
-def prefix(playername):
-    return SAVEDIR+playername
-#
 def readcoordsfile(filename, mode = "r"):
+    if (not os.path.exists(filename)):
+        return set()
     file = open(filename, mode)
     coords = set()
     for line in file:
         Line = line.strip()
-        if ('[' == Line[0]):
-            Line = Line[1:-1].split("] ... [")
-            (x1,y1) = Line[0].split(",")
-            (x2,y2) = Line[1].split("][")
-            (x1,x2,y1,y2) = (int(x1),int(x2),int(y1),int(y2))
-            for x in xrange(x1, x2+1):
-                for y in xrange(y1, y2+1):
-                    coords.add((x, y))
-        else:
-            Line = Line.split(SEP)
-            coords.add((int(Line[0]),int(Line[1])))
+        try:
+            if ('[' == Line[0]):
+                tmp = Line[1:-1].split("] ... [")
+                (x1,y1) = tmp[0].split(",")
+                (x2,y2) = tmp[1].split("][")
+                (x1,x2,y1,y2) = (int(x1),int(x2),int(y1),int(y2))
+                for x in xrange(x1, x2+1):
+                    for y in xrange(y1, y2+1):
+                        coords.add((x, y))
+            else:
+                tmp = Line.split(SEP)
+                coords.add((int(tmp[0]),int(tmp[1])))
+        except Exception as e:
+            print(str(filename)+": format invalide: "+Line)
     file.close()
     return coords
 #
@@ -65,7 +66,7 @@ def deltarget(playerdata, coords):
     unmark((playerdata[1],[]), coords, lambda w:str(w)+" n'etait pas un objectif")
 #
 def save(playername, playerdata):
-    filename = prefix(playername)+".txt"
+    filename = Core.prefix(playername)+".txt"
     def _save(filename, coords):
         file = open(filename, "w+")
         coords_list = list(coords)
@@ -73,16 +74,11 @@ def save(playername, playerdata):
         for el in coords_list:
             file.write(str(el[0])+SEP+str(el[1])+"\n")
         file.close()
-    _save(prefix(playername)+".txt", playerdata[0])
-    _save(prefix(playername)+".objectifs.txt", playerdata[1])
+    _save(Core.prefix(playername)+".txt", playerdata[0])
+    _save(Core.prefix(playername)+".objectifs.txt", playerdata[1])
 #
 def load(playername):
-    def _load(filename):
-        if (not os.path.exists(filename)):
-            return set()
-        else:
-            return readcoordsfile(filename, "r")
-    return (_load(prefix(playername)+".txt"), _load(prefix(playername)+".objectifs.txt"))
+    return (readcoordsfile(Core.prefix(playername)+".txt"), readcoordsfile(Core.prefix(playername)+".objectifs.txt"))
 #
 def loadPlanets(filename):
     file = open(filename, "r")

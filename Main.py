@@ -8,7 +8,7 @@ xrange = Core.getxrange()
 raw_input = Core.getraw_input()
 
 CONFIGDIR = Core.CONFIGDIR
-SAVEDIR = Data.SAVEDIR
+SAVEDIR = Core.SAVEDIR
 
 def Main():
     if (not os.path.isdir(CONFIGDIR)):
@@ -99,7 +99,7 @@ def Main():
                 elif (Core.oneIn(viewwords, Strlist)):
                     os.system(Map.getMapFilename(playername))
                 elif (Core.oneIn(targetwords, Strlist)):
-                    print('Entrez votre nouvel objectif:')
+                    print('Entrez vos nouveaux objectifs:')
                     while (not Core.oneIn(exitwords, Strlist)):
                         Str = raw_input("==> ").strip().lower()
                         if (Str == ""):

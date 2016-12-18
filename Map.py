@@ -38,8 +38,9 @@ def loadcoords(planets):
     return coords
 #
 def getcolorsconfig():
-    sections = Core.readconfigfile("colors.ini")
+    sections = Core.readconfigfile(Core.CONFIGDIR+"colors.ini")
     #apply specific treatments for special sections
+    draworder = []
     if ("example" in sections):
         del sections["example"]
     if ("display" in sections):
@@ -96,7 +97,7 @@ def getcolorsconfig():
     return (newsections, axescolor, draworder)
 #
 def getMapFilename(playername):
-    return Data.prefix(playername)+".png"
+    return Core.prefix(playername)+".png"
 #
 def gridlimits(xmin, xmax, ymin, ymax, x, y):
     if (x < xmin):
