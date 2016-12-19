@@ -67,14 +67,15 @@ def deltarget(playerdata, coords):
     unmark((playerdata[1],[]), coords, lambda w:str(w)+" n'etait pas un objectif")
 #
 def save(playername, playerdata):
-    filename = Core.prefix(playername)+".txt"
     def _save(filename, coords):
-        file = open(filename, "w+")
+        tmpfilename = filename+".tmp"
+        file = open(tmpfilename, "w+")
         coords_list = list(coords)
         coords_list.sort()
         for el in coords_list:
             file.write(str(el[0])+SEP+str(el[1])+"\n")
         file.close()
+        os.rename(tmpfilename, filename)
     _save(Core.prefix(playername)+".txt", playerdata[0])
     _save(Core.prefix(playername)+".objectifs.txt", playerdata[1])
 #
