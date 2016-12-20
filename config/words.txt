@@ -1,0 +1,10 @@
+[exit]
+    words = exit quit
+[map]
+    words = map genere image
+[save]
+    words = save write
+[target]
+    words = target objectif
+[view]
+    words = view
