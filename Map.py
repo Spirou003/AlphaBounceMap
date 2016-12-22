@@ -196,7 +196,8 @@ def drawmap(playername, explorations, coords, target, xmin, xmax, ymin, ymax, co
     image.save(getMapFilename(playername), "PNG")
 #
 def makeMap(playername, playerdata, planets):
-    (explorations, target) = playerdata
+    explorations = playerdata[0]
+    target = playerdata[1]
     (colors, axescolor, draworder) = getcolorsconfig()
     coords = loadcoords(planets)
     (xmin, xmax, ymin, ymax) = getgridlimits(explorations, coords, target)

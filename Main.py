@@ -24,7 +24,7 @@ def Main():
     commands = Core.readconfigfile(CONFIGDIR+"words.txt")
     
     #make sure that dictionnary contains all used keys
-    for key in ["map", "save", "target", "view", "exit"]:
+    for key in ["map", "save", "target", "view", "exit", "set-terre"]:
         if (key not in commands or "words" not in commands[key]):
             commands[key] = {"words":key}
     #
@@ -55,6 +55,12 @@ def Main():
     elif (playername in exitwords_reserved):
         sys.exit(0)
     playerdata = Data.load(playername)
+    settings = playerdata[2]
+    if (playername not in settings):
+        settings[playername] = {}
+    settings = settings[playername]
+    if ("terre" in settings):
+        planet_names = addTerre(settings, settings["terre"].split(), planets)
     Str = ""
     Strlist = []
     print('Tapez "help" pour obtenir de l\'aide')
@@ -109,6 +115,23 @@ def Main():
                             else:
                                 Data.deltarget(playerdata, coords)
                     Strlist = [] #don't exit immediately after that
+                elif (Core.oneIn(commands["set-terre"]["words"], Strlist)):
+                    print('Entrez les coordonnees de votre terre:')
+                    while (not Core.oneIn(commands["exit"]["words"], Strlist)):
+                        Str = raw_input("==> ").strip().lower()
+                        if (Str == ""):
+                            continue
+                        Strlist = Str.split(" ")
+                        if (Core.oneIn(commands["exit"]["words"], Strlist)):
+                            pass #nothing to do
+                        else:
+                            (coords, explore) = parsecoords(Str, Strlist, planet_names, planets)
+                            if (len(coords) != 1):
+                                print("Indiquez les coordonnees ecrites sur la carte PID")
+                            else:
+                                planet_names = addTerre(settings, coords[0], planets)
+                                break
+                    Strlist = [] #don't exit immediately after that
                 elif (Core.oneIn(commands["exit"]["words"], Strlist)):
                     pass #nothing to do
                 else:
@@ -124,7 +147,6 @@ def Main():
     except Exception as e:
         traceback.print_exc()
 #
-
 def parsecoords(Str, Strlist, planet_names, planets):
     def _parsecoords(Str, Strlist, planet_names, planets):
         if ("zone" in Strlist):
@@ -187,5 +209,10 @@ def parsecoords(Str, Strlist, planet_names, planets):
     if (not explore):
         Strlist.remove("d")
     return (_parsecoords(Str, Strlist, planet_names, planets), explore)
+#
+def addTerre(settings, coords, planets):
+    settings["terre"] = [str(coords[0]), str(coords[1])]
+    planets["terre"] = Data.getTerreCoords(int(coords[0]), int(coords[1]))
+    return list(planets.keys())
 #
 Main()

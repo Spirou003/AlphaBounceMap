@@ -60,6 +60,13 @@ def readconfigfile(filename):
     file.close()
     return sections
 #
+def saveconfigfile(sections, filename):
+    file = open(filename, "w+")
+    for section in sections:
+        file.write("["+str(section)+"]\n")
+        for config in sections[section]:
+            file.write("    "+str(config)+" = "+" ".join(sections[section][config])+"\n")
+#
 def isforbidden(pseudo):
     return (not pseudo.isalnum())
 #

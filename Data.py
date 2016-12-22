@@ -1,6 +1,7 @@
 #coding: utf-8
 import os
 import traceback
+import itertools
 
 import Core
 xrange = Core.getxrange()
@@ -78,9 +79,10 @@ def save(playername, playerdata):
         os.rename(tmpfilename, filename)
     _save(Core.prefix(playername)+".txt", playerdata[0])
     _save(Core.prefix(playername)+".objectifs.txt", playerdata[1])
+    Core.saveconfigfile(playerdata[2], Core.prefix(playername)+".infos.txt")
 #
 def load(playername):
-    return (readcoordsfile(Core.prefix(playername)+".txt"), readcoordsfile(Core.prefix(playername)+".objectifs.txt"))
+    return (readcoordsfile(Core.prefix(playername)+".txt"), readcoordsfile(Core.prefix(playername)+".objectifs.txt"), Core.readconfigfile(Core.prefix(playername)+".infos.txt"))
 #
 def loadPlanets(filename):
     file = open(filename, "r")
@@ -104,4 +106,13 @@ def loadPlanets(filename):
     file.close()
     return planets
 #
-
+def getTerreCoords(x, y):
+    coords = set()
+    for (X, Y) in itertools.product(xrange(x-3,x+3), xrange(y-3, y+3)):
+        coords.add((X, Y))
+    coords.remove((x-3, y-3))
+    coords.remove((x-3, y+2))
+    coords.remove((x+2, y+2))
+    coords.remove((x+2, y-3))
+    return coords
+#

@@ -8,3 +8,5 @@
     words = target objectif
 [view]
     words = view
+[set-terre]
+    words = set-terre
