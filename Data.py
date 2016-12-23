@@ -28,11 +28,14 @@ def readcoordsfile(filename, mode = "r"):
     file = open(filename, mode)
     coords = set()
     for line in file:
+        Line = line.strip()
+        if (len(Line) == 0):
+            continue
         try:
-            for (x, y) in parsecoordsline(line.strip()):
+            for (x, y) in parsecoordsline(Line):
                 coords.add((x, y))
         except Exception as e:
-            print(str(filename)+": format invalide: "+line)
+            print(str(filename)+": format invalide: "+Line)
     file.close()
     return coords
 #
@@ -78,17 +81,21 @@ def save(playername, playerdata):
         os.rename(tmpfilename, filename)
     _save(Core.prefix(playername)+".txt", playerdata[0])
     _save(Core.prefix(playername)+".objectifs.txt", playerdata[1])
-    Core.saveconfigfile(playerdata[2], Core.prefix(playername)+".infos.txt")
+    Core.saveconfigfile(playerdata[2], Core.prefix(playername)+".infos.ini")
 #
 def load(playername):
     return (readcoordsfile(Core.prefix(playername)+".txt"), readcoordsfile(Core.prefix(playername)+".objectifs.txt"), Core.readconfigfile(Core.prefix(playername)+".infos.txt"))
 #
 def loadPlanets(filename):
+    if (not os.path.exists(filename)):
+        return {}
     file = open(filename, "r")
     planets = {}
     current = set()
     for line in file:
         Line = line.strip()
+        if (len(Line) == 0):
+            continue
         if (Line[0] == "<" and Line[-1] == ">"):
             name = line.strip()[1:-1]
             if (name in planets):

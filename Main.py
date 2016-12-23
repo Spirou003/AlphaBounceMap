@@ -11,8 +11,7 @@ SAVEDIR = Core.SAVEDIR
 
 def Main():
     if (not os.path.isdir(CONFIGDIR)):
-        printf("Impossible de démarrer: le dossier "+CONFIGDIR+" est manquant.")
-        system.exit(0)
+        os.mkdir(CONFIGDIR)
     if (not os.path.isdir(SAVEDIR)):
         os.mkdir(SAVEDIR)
 
@@ -236,7 +235,7 @@ def print_help(Strlist, commands, planet_names):
             printf("--> Un secteur = une ligne, dont la structure est x"+Data.SEP+"y")
             printf(" "+str(playername)+".objectifs.txt: regroupe tous les secteurs considérés comme objectif")
             printf("--> Un secteur = une ligne, dont la structure est x"+Data.SEP+"y")
-            printf(" "+str(playername)+".infos.txt: regroupe diverses informations sous forme d'un fichier ini")
+            printf(" "+str(playername)+".infos.ini: regroupe diverses informations sous forme d'un fichier ini")
             printf("--> La position de la terre (si elle est connue), notée x y")
         elif (Core.oneIn(commands["target"]["words"], Strlist)):
             printf("Coming soon")
