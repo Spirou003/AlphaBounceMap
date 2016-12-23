@@ -43,6 +43,10 @@ def getcolorsconfig(requiredkeys):
     if ("display" in sections):
         draworder = sections["display"]["order"].split(" ")
         del sections["display"]
+    axesgrid = 10
+    if ("axes" in sections and "grid" in sections["axes"]):
+        axesgrid = sections["axes"]["grid"]
+        del sections["axes"]["grid"]
     newsections = {}
     refs = []
     #first pass: get colors from each line, if possible
@@ -88,6 +92,7 @@ def getcolorsconfig(requiredkeys):
     if ("axes" in newsections):
         axescolor = newsections["axes"]
         del newsections["axes"]
+    axescolor["grid"] = int(axesgrid)
     #third pass: ensure each used key exists
     if ("background" not in newsections):
         bgdic = {}
@@ -134,7 +139,8 @@ def getgridlimits(explorations, coords, target):
     ymax += 5
     return (xmin, xmax, ymin, ymax)
 #
-def drawgrid(image, axescolor, xmin, xmax, ymin, ymax, GRID=10):
+def drawgrid(image, axesconfig, xmin, xmax, ymin, ymax):
+    GRID = axesconfig["grid"]
     for x in xrange(xmin, xmax):
         for y in xrange(ymin, ymax):
             (cx, cy) = (x, y)
@@ -147,10 +153,10 @@ def drawgrid(image, axescolor, xmin, xmax, ymin, ymax, GRID=10):
                 cy /= GRID
             n = max(axex, axey)
             if (x == 0 or y == 0):
-                putpixel(image, x-xmin, y-ymin, axescolor["main"])
+                putpixel(image, x-xmin, y-ymin, axesconfig["main"])
             else:
                 for i in xrange(0, n):
-                    putpixel(image, x-xmin, y-ymin, axescolor["secondary"])
+                    putpixel(image, x-xmin, y-ymin, axesconfig["secondary"])
 #
 def putpixel(image, x, y, color):
     pixel = image.getpixel((x, y))
