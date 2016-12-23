@@ -74,6 +74,7 @@ def save(playername, playerdata):
         for el in coords_list:
             file.write(str(el[0])+SEP+str(el[1])+"\n")
         file.close()
+        os.remove(tmpfilename)
         os.rename(tmpfilename, filename)
     _save(Core.prefix(playername)+".txt", playerdata[0])
     _save(Core.prefix(playername)+".objectifs.txt", playerdata[1])
