@@ -36,6 +36,9 @@ def readconfigfile(filename):
     currentsection = None
     for oline in file:
         line = oline.strip().lower()
+        comment = line.find(";")
+        if (comment != -1):
+            line = line[:comment]
         if (len(line) == 0):
             continue
         N = len(line)
