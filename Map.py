@@ -36,12 +36,10 @@ def loadcoords(planets):
             coords[name] = Data.readcoordsfile(Core.CONFIGDIR+filename)
     return coords
 #
-def getcolorsconfig():
+def getcolorsconfig(requiredkeys):
     sections = Core.readconfigfile(Core.CONFIGDIR+"colors.ini")
     #apply specific treatments for special sections
     draworder = []
-    if ("example" in sections):
-        del sections["example"]
     if ("display" in sections):
         draworder = sections["display"]["order"].split(" ")
         del sections["display"]
@@ -84,12 +82,23 @@ def getcolorsconfig():
             except Exception as e:
                 #not added yet, or impossible to add => do nothing
                 pass
+            i += 1
     #remove remaining special section if it is (I do it here to use previous useful treatment for it)
     axescolor = {"main":(255,255,0,92),"secondary":(255,255,255,32)}
     if ("axes" in newsections):
         axescolor = newsections["axes"]
         del newsections["axes"]
-    #third pass: we need to have all config names for drawing, get missings if there are
+    #third pass: ensure each used key exists
+    if ("background" not in newsections):
+        bgdic = {}
+        bgdic["default"] = (0,0,170,255)
+        bgdic["onexplore"] = (200,0,0,255)
+        bgdic["ontarget"] = (0,192,0,255)
+        newsections["background"] = bgdic
+    for key in requiredkeys:
+        if (key not in newsections):
+            newsections[key] = newsections["background"]
+    #fourth pass: we need to have all config names for drawing, get missings if there are
     for key in newsections:
         if (key not in draworder):
             draworder.append(key)
@@ -197,8 +206,8 @@ def drawmap(playername, explorations, coords, target, xmin, xmax, ymin, ymax, co
 def makeMap(playername, playerdata, planets):
     explorations = playerdata[0]
     target = playerdata[1]
-    (colors, axescolor, draworder) = getcolorsconfig()
     coords = loadcoords(planets)
+    (colors, axescolor, draworder) = getcolorsconfig(coords.keys())
     (xmin, xmax, ymin, ymax) = getgridlimits(explorations, coords, target)
     drawmap(playername, explorations, coords, target, xmin, xmax, ymin, ymax, colors, draworder, axescolor)
 #
