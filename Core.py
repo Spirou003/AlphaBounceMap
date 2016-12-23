@@ -23,15 +23,27 @@ xrange = getxrange()
 raw_input = getraw_input()
 
 def prefix(playername):
+    """Get the prefix of all filenames used to save data's player (complete path relative to Main.py)"""
     return SAVEDIR+playername
 #
 def isint(string):
+    """Check if a string describes an integer without try-except"""
     if (string.isdigit()):
         return True
     else:
         return (string[0] == "-" and string[1:].isdigit())
 #
 def readconfigfile(filename):
+    """Read a structured file that describes a dictionnary of dictionnaries. Details below
+    
+    File contains text-blocks of this form:
+    [section]
+        config1 = xxxxx
+        ...
+        configN = yyyyy
+    
+    Where all names are free. Ignore leading and trealing blanks.
+    If the file is not readable, return {}"""
     if (not os.path.exists(filename)):
         return {}
     file = open(filename, "r")
@@ -61,6 +73,17 @@ def readconfigfile(filename):
     return sections
 #
 def saveconfigfile(sections, filename):
+    """Write dictionnary of dictionnaries to a file
+    
+    Output file is like this:
+    [key]
+        subkey1 = value1
+        ...
+        subkeyN = valueN
+    [key2]
+    ...
+    
+    And values are space-separated for each iterable object"""
     file = open(filename, "w+")
     for section in sections:
         file.write("["+str(section)+"]\n")
@@ -68,26 +91,18 @@ def saveconfigfile(sections, filename):
             file.write("    "+str(config)+" = "+" ".join(sections[section][config])+"\n")
 #
 def isforbidden(pseudo):
+    """Check if a string is a valid pseudo"""
     return (not pseudo.isalnum())
 #
 def removefromlist(collection, toremove):
+    """Delete each element of collection that is contained in toremove"""
     for el in toremove:
         if (el in collection):
             collection.remove(el)
 #
-def loadWords(filename):
-    if (os.path.exists(filename)):
-        file = open(filename, "r")
-        words = set()
-        for line in file:
-            words.add(line.strip().lower())
-        file.close()
-        return words
-    else:
-        return set()
-#
-def oneIn(list, string):
-    for name in list:
-        if name in string:
+def oneIn(first, second):
+    """Check if intersection of first and second is non-empty"""
+    for name in first:
+        if name in second:
             return True
     return False
