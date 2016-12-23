@@ -72,27 +72,7 @@ def Main():
             Strlist = Str.split(" ")
             try:
                 if ("help" in Strlist):
-                    if (len(Strlist) == 1):
-                        print('Tapez "x y" pour marquer le secteur aux coordonnees (x, y) exploree.')
-                        print('Tapez "zone x1 y1 x2 y2" pour marquer comme explore chaque secteur situe dans le rectangle decrit par les coordonnees (x1, y1) et (x2, y2).')
-                        print("Entrez le nom d'une planete pour marquer chacun de ses secteurs comme explore. Exception pour la Terre.")
-                        print('Liste des planetes: '+str(planet_names))
-                        print('Dans les commandes precedentes, l\'option "d" a pour effet de marquer comme non explore.')
-                        print("Pour quitter ce script, entrez l'un des mots suivants: "+str(commands["exit"]["words"]))
-                        print('Pour les autres commandes, tapez "help commandname" pour obtenir des informations supplementaires.')
-                        print('Valeurs possibles de "commandname" pour generer la carte: '+str(commands["map"]["words"]))
-                        print('Valeurs possibles de "commandname" pour sauvegarder les donnees: '+str(commands["save"]["words"]))
-                    else:
-                        if (Core.oneIn(commands["map"]["words"], Strlist)):
-                            print("Coming soon")
-                        elif (Core.oneIn(commands["save"]["words"], Strlist)):
-                            print("Coming soon")
-                        elif (Core.oneIn(planet_names, Strlist)):
-                            print("Coming soon")
-                        else:
-                            Strlist.remove("help")
-                            tempstring = " ".join(Strlist)
-                            print('Aucune commande du nom de "'+tempstring+'"')
+                    print_help(Strlist, commands, planet_names)
                 elif (Core.oneIn(commands["map"]["words"], Strlist)):
                     Map.makeMap(playername, playerdata, planets)
                 elif (Core.oneIn(commands["save"]["words"], Strlist)):
@@ -214,5 +194,60 @@ def addTerre(settings, coords, planets):
     settings["terre"] = [str(coords[0]), str(coords[1])]
     planets["terre"] = Data.getTerreCoords(int(coords[0]), int(coords[1]))
     return list(planets.keys())
+#
+def printwords(words):
+    return '"'+'", "'.join(words).strip('"').strip()+'"'
+#
+def print_help(Strlist, commands, planet_names):
+    if (len(Strlist) == 1):
+        print('Tapez "x y" pour marquer le secteur aux coordonnees (x, y) explore.')
+        print('Tapez "zone x1 y1 x2 y2" pour marquer comme explore chaque secteur situe dans le rectangle decrit par les coordonnees (x1, y1) et (x2, y2).')
+        print("Entrez le nom d'une planete pour marquer chacun de ses secteurs comme explore.")
+        print('Liste des planetes: '+printwords(planet_names))
+        print('Dans les commandes precedentes, l\'option "d" a pour effet de marquer comme non explore.')
+        print("Pour quitter ce script, entrez l'un des mots suivants: "+printwords(commands["exit"]["words"]))
+        print('Pour les autres commandes, tapez "help commandname" pour obtenir des informations supplementaires.')
+        print('Valeurs possibles de "commandname" pour generer la carte: '+printwords(commands["map"]["words"]))
+        print('Valeurs possibles de "commandname" pour sauvegarder les donnees: '+printwords(commands["save"]["words"]))
+        print('Valeurs possibles de "commandname" pour modifier les objectifs: '+printwords(commands["target"]["words"]))
+        print('Valeurs possibles de "commandname" pour situer la Terre: '+printwords(commands["set-terre"]["words"]))
+    else:
+        if (Core.oneIn(commands["map"]["words"], Strlist)):
+            print("La taille de la map est calculee sur base des criteres suivants:")
+            print("- Elle doit afficher tous les éléments de l'univers (planetes, asteroides)")
+            print("- Elle doit afficher tous les autres elements specifies dans le dossier config (par defaut: missiles)")
+            print("- Elle doit reprendre toutes les explorations d'un joueur ainsi que tous ses objectifs")
+            print("Les pixels de l'image representent les secteurs qui sont dessines sur la map")
+            print("- Chaque pixel est marque comme non explore")
+            print("- Chaque secteur explore est reporte, independament de son type (planete, asteroide, ...)")
+            print("- Les elements speciaux sont ensuite dessines (en tenant compte des objectifs et explorations)")
+            print("- Les secteurs designes comme objectif qui ne le sont pas encore sont alors dessines")
+            print("- Pour finir, des axes sont traces par dessus la map obtenue")
+            print("La map est enregistree dans le dossier saves au nom de \""+str(playername)+".png\"")
+            print("A chaque etape de la creation de la map, la couleur obtenue est calculee sur base de:")
+            print("- La couleur actuelle du pixel")
+            print("- La couleur de l'element a dessiner (varie selon le type de secteur et s'il est explore ou objectif)")
+            print("- La couleur de l'element a dessiner est prioritaire sur la couleur du secteur:")
+            print("--> plus la nouvelle couleur est opaque, moins l'ancienne couleur sera visible")
+            print("")
+            print("Les couleurs peuvent etre parametrees via le fichier \"config"+os.sep+"colors.ini")
+        elif (Core.oneIn(commands["save"]["words"], Strlist)):
+            print("Enregistre les donnees du joueur dans plusieurs fichiers du dossier saves:")
+            print("- "+str(playername)+".txt: regroupe tous les secteurs explores")
+            print("--> Un secteur = une ligne, dont la structure est x"+Data.SEP+"y")
+            print(" "+str(playername)+".objectifs.txt: regroupe tous les secteurs consideres comme objectif")
+            print("--> Un secteur = une ligne, dont la structure est x"+Data.SEP+"y")
+            print(" "+str(playername)+".infos.txt: regroupe diverses informations sous forme d'un fichier ini")
+            print("--> La position de la terre (si elle est connue), notee x y")
+        elif (Core.oneIn(commands["target"]["words"], Strlist)):
+            print("Coming soon")
+        elif (Core.oneIn(commands["set-terre"]["words"], Strlist)):
+            print("Coming soon")
+        elif (Core.oneIn(planet_names, Strlist)):
+            print("Coming soon")
+        else:
+            Strlist.remove("help")
+            tempstring = " ".join(Strlist)
+            print('Aucune commande du nom de "'+tempstring+'"')
 #
 Main()
