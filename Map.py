@@ -4,8 +4,7 @@ import traceback
 from PIL import Image, ImageColor, ImageDraw
 
 import Core, Data
-xrange = Core.getxrange()
-raw_input = Core.getraw_input()
+from Compatibility import *
 
 def getnamefrom_coords_name_txt(filename, coords, txt):
     if (len(filename) <= len(coords)+len(txt)):

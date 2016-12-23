@@ -4,9 +4,7 @@ import traceback
 import itertools
 
 import Core
-xrange = Core.getxrange()
-raw_input = Core.getraw_input()
-
+from Compatibility import *
 
 SEP = "."
 
@@ -56,16 +54,16 @@ def unmark(playerdata, coords, reunmarkmsg):
             playerdata[0].remove((x, y))
 #
 def explore(playerdata, coords):
-    mark(playerdata, coords, lambda w:str(w)+" est deja explore",lambda w:"Objectif atteint: "+str(w))
+    mark(playerdata, coords, lambda w:str(w)+" est déjà exploré",lambda w:"Objectif atteint: "+str(w))
 #
 def unexplore(playerdata, coords):
-    unmark(playerdata, coords, lambda w:str(w)+" n'est pas encore explore")
+    unmark(playerdata, coords, lambda w:str(w)+" n'est pas encore exploré")
 #
 def addtarget(playerdata, coords):
-    mark((playerdata[1],[]), coords, lambda w:str(w)+" est deja un objectif",lambda w:"Erreur: cela ne doit jamais arriver!!!")
+    mark((playerdata[1],[]), coords, lambda w:str(w)+" est déjà un objectif",lambda w:"Erreur: cela ne doit jamais arriver!!!")
 #
 def deltarget(playerdata, coords):
-    unmark((playerdata[1],[]), coords, lambda w:str(w)+" n'etait pas un objectif")
+    unmark((playerdata[1],[]), coords, lambda w:str(w)+" n'était pas un objectif")
 #
 def save(playername, playerdata):
     def _save(filename, coords):

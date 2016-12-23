@@ -2,25 +2,10 @@
 import os
 import sys
 
+from Compatibility import *
+
 CONFIGDIR = "config"+os.sep
 SAVEDIR = "saves"+os.sep
-
-def getxrange():
-    """Tricky function to have a python 2-3 compatible xrange"""
-    if (sys.version_info[0] == 2):
-        return xrange
-    else:
-        return range
-#
-def getraw_input():
-    """Tricky function to have a python 2-3 compatible raw_input"""
-    if (sys.version_info[0] == 2):
-        return raw_input
-    else:
-        return input
-#
-xrange = getxrange()
-raw_input = getraw_input()
 
 def prefix(playername):
     """Get the prefix of all filenames used to save data's player (complete path relative to Main.py)"""
