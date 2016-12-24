@@ -221,7 +221,7 @@ def print_help(Strlist, commands, planet_names):
             printf("- Les éléments spéciaux sont ensuite dessinés (en tenant compte des objectifs et explorations)")
             printf("- Les secteurs désignés comme objectif qui ne le sont pas encore sont alors dessinés")
             printf("- Pour finir, des axes sont tracés par dessus la map obtenue")
-            printf("La map est enregistrée dans le dossier saves au nom de \""+str(playername)+".png\"")
+            printf("La map est enregistrée dans le dossier saves au nom de \""+Map.getMapFilename+"\"")
             printf("À chaque étape de la création de la map, la couleur obtenue est calculée sur base de:")
             printf("- La couleur actuelle du pixel")
             printf("- La couleur de l'élément à dessiner (varie selon le type de secteur et s'il est exploré ou objectif)")

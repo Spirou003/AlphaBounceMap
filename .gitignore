@@ -1,5 +1,5 @@
+*.bmp
 *.png
-/*.txt
 *.pyc
 *.bat
-saves/*.txt
+saves/

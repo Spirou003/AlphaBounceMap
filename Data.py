@@ -84,7 +84,7 @@ def save(playername, playerdata):
     Core.saveconfigfile(playerdata[2], Core.prefix(playername)+".infos.ini")
 #
 def load(playername):
-    return (readcoordsfile(Core.prefix(playername)+".txt"), readcoordsfile(Core.prefix(playername)+".objectifs.txt"), Core.readconfigfile(Core.prefix(playername)+".infos.txt"))
+    return (readcoordsfile(Core.prefix(playername)+".txt"), readcoordsfile(Core.prefix(playername)+".objectifs.txt"), Core.readconfigfile(Core.prefix(playername)+".infos.ini"))
 #
 def loadPlanets(filename):
     if (not os.path.exists(filename)):

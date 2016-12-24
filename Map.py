@@ -1,9 +1,10 @@
 #coding: utf-8
 import os
 import traceback
-from PIL import Image, ImageColor, ImageDraw
 
 import Core, Data
+
+from Image import EXT, getpixel, setpixel, createimage, save
 from Compatibility import *
 
 def getnamefrom_coords_name_txt(filename, coords, txt):
@@ -110,7 +111,7 @@ def getcolorsconfig(requiredkeys):
     return (newsections, axescolor, draworder)
 #
 def getMapFilename(playername):
-    return Core.prefix(playername)+".png"
+    return Core.prefix(playername)+EXT
 #
 def gridlimits(xmin, xmax, ymin, ymax, x, y):
     if (x < xmin):
@@ -153,13 +154,13 @@ def drawgrid(image, axesconfig, xmin, xmax, ymin, ymax):
                 cy /= GRID
             n = max(axex, axey)
             if (x == 0 or y == 0):
-                putpixel(image, x-xmin, y-ymin, axesconfig["main"])
+                paintpixel(image, x-xmin, y-ymin, axesconfig["main"])
             else:
                 for i in xrange(0, n):
-                    putpixel(image, x-xmin, y-ymin, axesconfig["secondary"])
+                    paintpixel(image, x-xmin, y-ymin, axesconfig["secondary"])
 #
-def putpixel(image, x, y, color):
-    pixel = image.getpixel((x, y))
+def paintpixel(image, x, y, color):
+    pixel = getpixel(image, x, y)
     newpixr = color[0]/255.
     newpixg = color[1]/255.
     newpixb = color[2]/255.
@@ -173,19 +174,19 @@ def putpixel(image, x, y, color):
     g = int(255*(newpixg*newpixa + coeff*oldpixg))
     b = int(255*(newpixb*newpixa + coeff*oldpixb))
     a = int(255*(1-(1-newpixa)*(1-oldpixa)))
-    image.putpixel((x, y), (r, g, b, a))
+    setpixel(image, x, y, [r, g, b, a])
 #
 def drawlist(keylist, image, xmin, xmax, ymin, ymax, colors, explorations, target):
     for (x, y) in keylist:
         if ((x, y) in target):
-            putpixel(image, x-xmin, y-ymin, colors["ontarget"])
+            paintpixel(image, x-xmin, y-ymin, colors["ontarget"])
         elif ((x, y) in explorations):
-            putpixel(image, x-xmin, y-ymin, colors["onexplore"])
+            paintpixel(image, x-xmin, y-ymin, colors["onexplore"])
         else:
-            putpixel(image, x-xmin, y-ymin, colors["default"])
+            paintpixel(image, x-xmin, y-ymin, colors["default"])
 #
 def drawmap(playername, explorations, coords, target, xmin, xmax, ymin, ymax, colors, draworder, axescolor):
-    image = Image.new("RGBA", (xmax-xmin+1, ymax-ymin+1), colors["background"]["default"])
+    image = createimage(xmax-xmin+1, ymax-ymin+1, colors["background"]["default"])
     #draw explorations
     for (x, y) in explorations:
         color = None
@@ -193,7 +194,7 @@ def drawmap(playername, explorations, coords, target, xmin, xmax, ymin, ymax, co
             color = colors["background"]["ontarget"]
         else:
             color = colors["background"]["onexplore"]
-        image.putpixel((x-xmin, y-ymin), color)
+        setpixel(image, x-xmin, y-ymin, color)
     #draw entities (planets, asteroids, ...)
     for key in draworder:
         if (key in coords):
@@ -205,9 +206,9 @@ def drawmap(playername, explorations, coords, target, xmin, xmax, ymin, ymax, co
         Core.removefromlist(target_copy, explorations)
     color = colors["background"]["ontarget"]
     for (x, y) in target_copy:
-        image.putpixel((x-xmin, y-ymin), color)
+        setpixel(image, x-xmin, y-ymin, color)
     drawgrid(image, axescolor, xmin, xmax, ymin, ymax)
-    image.save(getMapFilename(playername), "PNG")
+    save(image, getMapFilename(playername))
 #
 def makeMap(playername, playerdata, planets):
     explorations = playerdata[0]
