@@ -10,6 +10,18 @@ I don't want to use modules like futurize because the program have to work:
 
 xrange = xrange if (sys.version_info[0] == 2) else range
 raw_input = raw_input if (sys.version_info[0] == 2) else input
+long = long if (sys.version_info[0] == 2) else lambda x:x
+
+binarywrite = None
+if (sys.version_info[0] == 2):
+    def bw(file, data):
+        file.write(data)
+    binarywrite = bw
+else:
+    def bw(file, data):
+        file.write(data.encode('latin-1'))
+    binarywrite = bw
+#
 
 """
 We need accents for french => need UTF-8

@@ -31,7 +31,7 @@ def ito4chr(i):
     hi = (long(i) & 0x7fff0000) >> 16
     lo = long(i) & 0x0000ffff
     return ito2chr(lo) + ito2chr(hi)
-
+#
 def save(image, filename):
     f = open(filename, "wb+")
     wd = len(image[0])
@@ -42,26 +42,26 @@ def save(image, filename):
     headersize = 54
 
     #Header
-    f.write("BM")
-    f.write(ito4chr(headersize + pixelssize))
-    f.write(ito4chr(0))
-    f.write(ito4chr(headersize))
-    f.write(ito4chr(40))
-    f.write(ito4chr(wd))
-    f.write(ito4chr(ht))
-    f.write(ito2chr(1))
-    f.write(ito2chr(24))#bits per pixel
-    f.write(ito4chr(0))#don't ccompress
-    f.write(ito4chr(pixelssize))
-    f.write(ito4chr(1))#horizontal size of pixel
-    f.write(ito4chr(1))#vertical size of pixel
-    f.write(ito4chr(0))
-    f.write(ito4chr(0))
+    binarywrite(f, "BM")
+    binarywrite(f, ito4chr(headersize + pixelssize))
+    binarywrite(f, ito4chr(0))
+    binarywrite(f, ito4chr(headersize))
+    binarywrite(f, ito4chr(40))
+    binarywrite(f, ito4chr(wd))
+    binarywrite(f, ito4chr(ht))
+    binarywrite(f, ito2chr(1))
+    binarywrite(f, ito2chr(24))#bits per pixel
+    binarywrite(f, ito4chr(0))#don't ccompress
+    binarywrite(f, ito4chr(pixelssize))
+    binarywrite(f, ito4chr(1))#horizontal size of pixel
+    binarywrite(f, ito4chr(1))#vertical size of pixel
+    binarywrite(f, ito4chr(0))
+    binarywrite(f, ito4chr(0))
 
     #Pixels
     for row in image:
         for pixel in row:
-            f.write(chr(pixel[2])+chr(pixel[1])+chr(pixel[0]))
+            binarywrite(f, chr(pixel[2])+chr(pixel[1])+chr(pixel[0]))
         for i in xrange(line_padding):
-            f.write(chr(0))
+            binarywrite(f, chr(0))
     f.close()
