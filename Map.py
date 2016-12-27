@@ -161,19 +161,19 @@ def drawgrid(image, axesconfig, xmin, xmax, ymin, ymax):
 #
 def paintpixel(image, x, y, color):
     pixel = getpixel(image, x, y)
-    newpixr = color[0]/255.
-    newpixg = color[1]/255.
-    newpixb = color[2]/255.
-    newpixa = color[3]/255.
-    oldpixr = pixel[0]/255.
-    oldpixg = pixel[1]/255.
-    oldpixb = pixel[2]/255.
-    oldpixa = pixel[3]/255.
-    coeff = (1-newpixa)*oldpixa
-    r = int(255*(newpixr*newpixa + coeff*oldpixr))
-    g = int(255*(newpixg*newpixa + coeff*oldpixg))
-    b = int(255*(newpixb*newpixa + coeff*oldpixb))
-    a = int(255*(1-(1-newpixa)*(1-oldpixa)))
+    newpixr = color[0]
+    newpixg = color[1]
+    newpixb = color[2]
+    newpixa = color[3]
+    oldpixr = pixel[0]
+    oldpixg = pixel[1]
+    oldpixb = pixel[2]
+    oldpixa = pixel[3]
+    coeff = ((255-newpixa)*oldpixa)//255
+    r = (newpixr*newpixa + coeff*oldpixr)//255
+    g = (newpixg*newpixa + coeff*oldpixg)//255
+    b = (newpixb*newpixa + coeff*oldpixb)//255
+    a = (255*255-(255-newpixa)*(255-oldpixa))//255
     setpixel(image, x, y, [r, g, b, a])
 #
 def drawlist(keylist, image, xmin, xmax, ymin, ymax, colors, explorations, target):
