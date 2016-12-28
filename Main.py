@@ -19,7 +19,7 @@ def Main():
     planet_names = list(planets.keys())
     reservedwords = ["zone", "d", "help"] + planet_names
 
-    commands = Core.readconfigfile(CONFIGDIR+"words.txt")
+    commands = Core.readconfigfile(CONFIGDIR+"words.ini")
     
     #make sure that dictionnary contains all used keys
     for key in ["map", "save", "target", "view", "exit", "set-terre"]:
@@ -70,7 +70,7 @@ def Main():
             Strlist = Str.split(" ")
             try:
                 if ("help" in Strlist):
-                    print_help(Strlist, commands, planet_names)
+                    print_help(Strlist, commands, planet_names, playername)
                 elif (Core.oneIn(commands["map"]["words"], Strlist)):
                     Map.makeMap(playername, playerdata, planets)
                 elif (Core.oneIn(commands["save"]["words"], Strlist)):
@@ -100,7 +100,13 @@ def Main():
                         if (Str == ""):
                             continue
                         Strlist = Str.split(" ")
-                        if (Core.oneIn(commands["exit"]["words"], Strlist)):
+                        if ("help" in Strlist):
+                            printf("Vous êtes dans le mode d'édition de la terre.")
+                            printf("Dans ce mode, seules trois commandes sont disponibles:")
+                            printf("- afficher un descriptif du mode d'édition de la terre (\"help\")")
+                            printf("- revenir au mode d'exploration: tapez l'un des mots suivants: "+printwords(commands["exit"]["words"]))
+                            printf("- indiquer l'emplacement de la terre: tapez \"x y\" en remplaçant x et y par les coordonnées indiquées par la carte PID")
+                        elif (Core.oneIn(commands["exit"]["words"], Strlist)):
                             pass #nothing to do
                         else:
                             (coords, explore) = parsecoords(Str, Strlist, planet_names, planets)
@@ -196,7 +202,7 @@ def addTerre(settings, coords, planets):
 def printwords(words):
     return '"'+'", "'.join(words).strip('"').strip()+'"'
 #
-def print_help(Strlist, commands, planet_names):
+def print_help(Strlist, commands, planet_names, playername):
     if (len(Strlist) == 1):
         printf('Tapez "x y" pour marquer le secteur aux coordonnées (x, y) exploré.')
         printf('Tapez "zone x1 y1 x2 y2" pour marquer comme exploré chaque secteur situé dans le rectangle décrit par les coordonnées (x1, y1) et (x2, y2).')
@@ -221,7 +227,7 @@ def print_help(Strlist, commands, planet_names):
             printf("- Les éléments spéciaux sont ensuite dessinés (en tenant compte des objectifs et explorations)")
             printf("- Les secteurs désignés comme objectif qui ne le sont pas encore sont alors dessinés")
             printf("- Pour finir, des axes sont tracés par dessus la map obtenue")
-            printf("La map est enregistrée dans le dossier saves au nom de \""+Map.getMapFilename+"\"")
+            printf("La map est enregistrée dans le dossier de sauvegardes au nom de \""+Map.getMapFilename(playername)+"\"")
             printf("À chaque étape de la création de la map, la couleur obtenue est calculée sur base de:")
             printf("- La couleur actuelle du pixel")
             printf("- La couleur de l'élément à dessiner (varie selon le type de secteur et s'il est exploré ou objectif)")
@@ -240,9 +246,11 @@ def print_help(Strlist, commands, planet_names):
         elif (Core.oneIn(commands["target"]["words"], Strlist)):
             printf("Coming soon")
         elif (Core.oneIn(commands["set-terre"]["words"], Strlist)):
-            printf("Coming soon")
-        elif (Core.oneIn(planet_names, Strlist)):
-            printf("Coming soon")
+            printf("Passe en mode d'édition de la terre.")
+            printf("Dans ce mode, seules trois commandes sont disponibles:")
+            printf("- afficher ce message")
+            printf("- quitter ce mode: tapez l'un des mots suivants: "+printwords(commands["exit"]["words"]))
+            printf("- indiquer l'emplacement de la terre: tapez \"x y\" en remplaçant x et y par les coordonnées indiquées par la carte PID")
         else:
             Strlist.remove("help")
             tempstring = " ".join(Strlist)
