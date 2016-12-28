@@ -1,6 +1,7 @@
 #coding: utf-8
 import os
 import traceback
+import itertools
 
 import Core, Data
 
@@ -140,10 +141,31 @@ def getgridlimits(explorations, coords, target):
     ymax += 5
     return (xmin, xmax, ymin, ymax)
 #
-def drawgrid(image, axesconfig, xmin, xmax, ymin, ymax):
-    GRID = axesconfig["grid"]
-    for x in xrange(xmin, xmax):
-        for y in xrange(ymin, ymax):
+def drawhorizontalaxes(image, xmin, xmax, ymin, ymax, GRID, color):
+    G = 1
+    while (G < max(abs(ymin), abs(ymax))):
+        G *= GRID
+        for y in xrange(ymin + (G-ymin%G)%G, ymax+1, G):
+            if (y == 0):
+                continue
+            for k in xrange(xmin - xmin%GRID, xmax, GRID):
+                for x in xrange(max(xmin, k+1), min(xmax+1, k+GRID)):
+                    paintpixel(image, x-xmin, y-ymin, color)
+#
+def drawverticalaxes(image, xmin, xmax, ymin, ymax, GRID, color):
+    G = 1
+    while (G < max(abs(xmin), abs(xmax))):
+        G *= GRID
+        for x in xrange(xmin + (G-xmin%G)%G, xmax+1, G):
+            if (x == 0):
+                continue
+            for k in xrange(ymin - ymin%GRID, ymax, GRID):
+                for y in xrange(max(ymin, k+1), min(ymax+1, k+GRID)):
+                    paintpixel(image, x-xmin, y-ymin, color)
+#
+def drawintersections(image, xmin, xmax, ymin, ymax, GRID, color):
+    for (x, y) in itertools.product(xrange(xmin + (GRID-xmin%GRID)%GRID, xmax+1, GRID), xrange(ymin + (GRID-ymin%GRID)%GRID, ymax+1, GRID)):
+        if (x != 0 and y != 0):
             (cx, cy) = (x, y)
             (axex, axey) = (0, 0)
             while (cx % GRID == 0 and cx != 0):
@@ -153,11 +175,20 @@ def drawgrid(image, axesconfig, xmin, xmax, ymin, ymax):
                 axey += 1
                 cy /= GRID
             n = max(axex, axey)
-            if (x == 0 or y == 0):
-                paintpixel(image, x-xmin, y-ymin, axesconfig["main"])
-            else:
-                for i in xrange(0, n):
-                    paintpixel(image, x-xmin, y-ymin, axesconfig["secondary"])
+            for i in xrange(0, n):
+                paintpixel(image, x-xmin, y-ymin, color)
+#
+def drawgrid(image, axesconfig, xmin, xmax, ymin, ymax):
+    GRID = axesconfig["grid"]
+    for x in xrange(xmin, xmax+1):
+        paintpixel(image, x-xmin, 0-ymin, axesconfig["main"])
+    for y in xrange(ymin, 0):
+        paintpixel(image, 0-xmin, y-ymin, axesconfig["main"])
+    for y in xrange(1, ymax+1):
+        paintpixel(image, 0-xmin, y-ymin, axesconfig["main"])
+    drawhorizontalaxes(image, xmin, xmax, ymin, ymax, GRID, axesconfig["secondary"])
+    drawverticalaxes(image, xmin, xmax, ymin, ymax, GRID, axesconfig["secondary"])
+    drawintersections(image, xmin, xmax, ymin, ymax, GRID, axesconfig["secondary"])
 #
 def paintpixel(image, x, y, color):
     pixel = getpixel(image, x, y)
