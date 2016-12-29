@@ -21,19 +21,26 @@ def Main():
 
     commands = Core.readconfigfile(CONFIGDIR+"words.ini")
     
-    #make sure that dictionnary contains all used keys
-    for key in ["map", "save", "target", "view", "exit", "set-terre"]:
+    #make sure that dictionnary contains all used keys and for all keys, each required subdictionnary is given
+    requiredkeys = {"map":[], "save":[], "target":["delallexplored","removeall"], "view":[], "exit":[], "set-terre":[]}
+    for key in requiredkeys:
         if (key not in commands or "words" not in commands[key]):
             commands[key] = {"words":key}
+        for subkey in requiredkeys[key]:
+            if (subkey not in commands[key]):
+                commands[key][subkey] = subkey
     #
     #get set of words for each command (instead of space-separated string)
     #keep only non reserved words, but at least one
     for key in commands:
-        if "words" in commands[key]:
-            commands[key]["words"] = set(commands[key]["words"].split())
-            Core.removefromlist(commands[key]["words"], reservedwords)
-            if (len(commands[key]["words"]) == 0):
-                commands[key]["words"].add(key)
+        for subkey in commands[key]:
+            commands[key][subkey] = set(commands[key][subkey].split())
+            Core.removefromlist(commands[key][subkey], reservedwords)
+            if (len(commands[key][subkey]) == 0):
+                if (subkey == "words"):
+                    commands[key][subkey].add(key)
+                else:
+                    commands[key][subkey].add(subkey)
     #
     #use some standard words to exit prompt
     exitwords_reserved = ("quit", "exit")
@@ -63,12 +70,15 @@ def Main():
     Strlist = []
     printf('Tapez "help" pour obtenir de l\'aide')
     try:
-        while (not Core.oneIn(commands["exit"]["words"], Strlist)):
+        exit = False
+        while (not exit and not Core.oneIn(commands["exit"]["words"], Strlist)):
             Str = raw_input("> ").strip().lower()
             if (Str == ""):
                 continue
             Strlist = Str.split(" ")
             try:
+                if (Core.oneIn(commands["exit"]["words"], Strlist)):
+                    exit = True
                 if ("help" in Strlist):
                     print_help(Strlist, commands, planet_names, playername)
                 elif (Core.oneIn(commands["map"]["words"], Strlist)):
@@ -77,14 +87,18 @@ def Main():
                     Data.save(playername, playerdata)
                 elif (Core.oneIn(commands["view"]["words"], Strlist)):
                     os.system(Map.getMapFilename(playername))
-                elif (Core.oneIn(commands["target"]["words"], Strlist)):
+                elif (Core.oneIn(commands["target"]["words"], Strlist) and not exit):
                     printf('Entrez vos nouveaux objectifs:')
                     while (not Core.oneIn(commands["exit"]["words"], Strlist)):
                         Str = raw_input("==> ").strip().lower()
                         if (Str == ""):
                             continue
                         Strlist = Str.split(" ")
-                        if (Core.oneIn(commands["exit"]["words"], Strlist)):
+                        if (Core.oneIn(commands["target"]["removeall"], Strlist)):
+                            Data.cleartargets(playerdata)
+                        if (Core.oneIn(commands["target"]["delallexplored"], Strlist)):
+                            Data.cleantargets(playerdata)
+                        elif (Core.oneIn(commands["exit"]["words"], Strlist)):
                             pass #nothing to do
                         else:
                             (coords, explore) = parsecoords(Str, Strlist, planet_names, planets)
@@ -93,7 +107,7 @@ def Main():
                             else:
                                 Data.deltarget(playerdata, coords)
                     Strlist = [] #don't exit immediately after that
-                elif (Core.oneIn(commands["set-terre"]["words"], Strlist)):
+                elif (Core.oneIn(commands["set-terre"]["words"], Strlist) and not exit):
                     printf('Entrez les coordonnées de votre terre:')
                     while (not Core.oneIn(commands["exit"]["words"], Strlist)):
                         Str = raw_input("==> ").strip().lower()

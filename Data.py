@@ -68,6 +68,14 @@ def addtarget(playerdata, coords):
 def deltarget(playerdata, coords):
     unmark((playerdata[1],[]), coords, lambda w:str(w)+" n'était pas un objectif")
 #
+def cleartargets(playerdata):
+    playerdata[1].clear()
+#
+def cleantargets(playerdata):
+    for (x, y) in set(playerdata[1]):
+        if (x, y) in playerdata[0]:
+            playerdata[1].remove((x, y))
+#
 def save(playername, playerdata):
     def _save(filename, coords):
         tmpfilename = filename+".tmp"
