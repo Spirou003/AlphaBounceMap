@@ -38,6 +38,9 @@ def loadcoords(planets):
             coords[name] = Data.readcoordsfile(Core.CONFIGDIR+filename)
     return coords
 #
+def isint8(v):
+    return 0 <= v <= 255
+#
 def getcolorsconfig(requiredkeys):
     sections = Core.readconfigfile(Core.CONFIGDIR+"colors.ini")
     #apply specific treatments for special sections
@@ -63,14 +66,25 @@ def getcolorsconfig(requiredkeys):
                     rgba.append(255)
                 (r, g, b, a) = rgba
                 try:
-                    newconfigs[configname] = (int(r), int(g), int(b), int(a))
+                    (r, g, b, a) = (int(r), int(g), int(b), int(a))
+                    if not (isint8(r) and isint8(g) and isint8(b) and isint8(a)):
+                        if (not isint8(r)):
+                            printf("Attention: "+str(sectionname)+"."+str(configname)+": r doit être compris entre 0 et 255 inclus")
+                        if (not isint8(g)):
+                            printf("Attention: "+str(sectionname)+"."+str(configname)+": g doit être compris entre 0 et 255 inclus")
+                        if (not isint8(b)):
+                            printf("Attention: "+str(sectionname)+"."+str(configname)+": b doit être compris entre 0 et 255 inclus")
+                        if (not isint8(a)):
+                            printf("Attention: "+str(sectionname)+"."+str(configname)+": a doit être compris entre 0 et 255 inclus")
+                    else:
+                        newconfigs[configname] = (r, g, b, a)
                 except Exception as e:
-                    #unknown format
+                    printf("Attention: "+str(sectionname)+"."+str(configname)+": format non reconnu")
                     pass
             elif (len(ext) == 2):
                 refs.append((sectionname, configname, ext))
             else:
-                #unknown format
+                printf("Attention: "+str(sectionname)+"."+str(configname)+": format non reconnu")
                 pass
         newsections[sectionname] = newconfigs
     oldreflen = -1
@@ -89,22 +103,45 @@ def getcolorsconfig(requiredkeys):
                 #not added yet, or impossible to add => do nothing
                 pass
             i += 1
+    if (len(refs) > 0):
+        printf("Attention: les références suivantes ne peuvent pas être résolues:")
+        for ref in refs:
+            (sn, cn, (esn, ecn)) = ref
+            printf(str(sn)+"."+str(cn)+" -> "+str(esn)+"."+str(ecn))
     #remove remaining special section if it is (I do it here to use previous useful treatment for it)
     axescolor = {"main":(255,255,0,92),"secondary":(255,255,255,32)}
     if ("axes" in newsections):
+        for key in axescolor:
+            if (key not in newsections["axes"]):
+                newsections["axes"][key] = axescolor[key]
         axescolor = newsections["axes"]
         del newsections["axes"]
-    axescolor["grid"] = int(axesgrid)
+    try:
+        axescolor["grid"] = int(axesgrid)
+    except Exception as e:
+        printf("Erreur: axes.grid: paramètre invalide")
+        return
     #third pass: ensure each used key exists
-    if ("background" not in newsections):
-        bgdic = {}
-        bgdic["default"] = (0,0,170,255)
-        bgdic["onexplore"] = (200,0,0,255)
-        bgdic["ontarget"] = (0,192,0,255)
-        newsections["background"] = bgdic
-    for key in requiredkeys:
+    defaultcolors = {"default":(0,0,170,255),"onexplore":(200,0,0,255),"ontarget":(0,192,0,255)}
+    #use background as default as possible
+    if ("background" in newsections):
+        for key in defaultcolors:
+            if (key in newsections["background"]):
+                defaultcolors[key] = newsections["background"][key]
+    for key in requiredkeys+["background"]:
         if (key not in newsections):
-            newsections[key] = newsections["background"]
+            newsections[key] = defaultcolors
+            printf("Attention: "+str(key)+": section manquante")
+        else:
+            if ("default" not in newsections[key]):
+                printf("Attention: "+str(key)+".default: paramètre manquant")
+                newsections[key]["default"] = defaultcolors["default"]
+            if ("onexplore" not in newsections[key]):
+                printf("Attention: "+str(key)+".onexplore: paramètre manquant")
+                newsections[key]["onexplore"] = defaultcolors["onexplore"]
+            if ("ontarget" not in newsections[key]):
+                printf("Attention: "+str(key)+".ontarget: paramètre manquant")
+                newsections[key]["ontarget"] = defaultcolors["ontarget"]
     #fourth pass: we need to have all config names for drawing, get missings if there are
     for key in newsections:
         if (key not in draworder):
@@ -186,9 +223,10 @@ def drawgrid(image, axesconfig, xmin, xmax, ymin, ymax):
         paintpixel(image, 0-xmin, y-ymin, axesconfig["main"])
     for y in xrange(1, ymax+1):
         paintpixel(image, 0-xmin, y-ymin, axesconfig["main"])
-    drawhorizontalaxes(image, xmin, xmax, ymin, ymax, GRID, axesconfig["secondary"])
-    drawverticalaxes(image, xmin, xmax, ymin, ymax, GRID, axesconfig["secondary"])
-    drawintersections(image, xmin, xmax, ymin, ymax, GRID, axesconfig["secondary"])
+    if (GRID > 1):
+        drawhorizontalaxes(image, xmin, xmax, ymin, ymax, GRID, axesconfig["secondary"])
+        drawverticalaxes(image, xmin, xmax, ymin, ymax, GRID, axesconfig["secondary"])
+        drawintersections(image, xmin, xmax, ymin, ymax, GRID, axesconfig["secondary"])
 #
 def paintpixel(image, x, y, color):
     pixel = getpixel(image, x, y)
@@ -245,7 +283,10 @@ def makeMap(playername, playerdata, planets):
     explorations = playerdata[0]
     target = playerdata[1]
     coords = loadcoords(planets)
-    (colors, axescolor, draworder) = getcolorsconfig(coords.keys())
+    ret = getcolorsconfig(coords.keys())
+    if (ret == None):
+        return
+    (colors, axescolor, draworder) = ret
     (xmin, xmax, ymin, ymax) = getgridlimits(explorations, coords, target)
     drawmap(playername, explorations, coords, target, xmin, xmax, ymin, ymax, colors, draworder, axescolor)
 #

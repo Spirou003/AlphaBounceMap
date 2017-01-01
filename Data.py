@@ -35,7 +35,7 @@ def readcoordsfile(filename, mode = "r"):
             for (x, y) in parsecoordsline(Line):
                 coords.add((x, y))
         except Exception as e:
-            print(str(filename)+": format invalide: "+Line)
+            printf(str(filename)+": format invalide: "+Line)
     file.close()
     return coords
 #
@@ -44,15 +44,15 @@ def mark(playerdata, coords, remarkmsg, targetmsg):
         if ((x, y) not in playerdata[0]):
             playerdata[0].add((x, y))
         else:
-            print(remarkmsg(printablecoords(x, y)))
+            printf(remarkmsg(printablecoords(x, y)))
         if ((x, y) in playerdata[1]):
             playerdata[1].remove((x, y))
-            print(targetmsg(printablecoords(x, y)))
+            printf(targetmsg(printablecoords(x, y)))
 #
 def unmark(playerdata, coords, reunmarkmsg):
     for (x, y) in coords:
         if ((x, y) not in playerdata[0]):
-            print(reunmarkmsg(printablecoords(x, y)))
+            printf(reunmarkmsg(printablecoords(x, y)))
         else:
             playerdata[0].remove((x, y))
 #
@@ -116,7 +116,7 @@ def loadPlanets(filename):
                 for (x, y) in parsecoordsline(Line):
                     current.add((x, y))
             except Exception as e:
-                print(str(filename)+": format invalide: "+line)
+                printf(str(filename)+": format invalide: "+line)
     file.close()
     return planets
 #

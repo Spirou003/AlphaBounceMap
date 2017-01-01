@@ -23,24 +23,38 @@ def Main():
     
     #make sure that dictionnary contains all used keys and for all keys, each required subdictionnary is given
     requiredkeys = {"map":[], "save":[], "target":["delallexplored","removeall"], "view":[], "exit":[], "set-terre":[]}
+    errmsg = ""
     for key in requiredkeys:
-        if (key not in commands or "words" not in commands[key]):
+        if (key not in commands):
             commands[key] = {"words":key}
+            errmsg += "- section "+key+" non trouvée\n"
+        elif ("words" not in commands[key]):
+            commands[key]["words"] = key
+            errmsg += "- aucun mot pour la commande "+key+"\n"
         for subkey in requiredkeys[key]:
             if (subkey not in commands[key]):
                 commands[key][subkey] = subkey
+                errmsg += "- paramètre manquant dans la commande "+key+": "+subkey+"\n"
     #
     #get set of words for each command (instead of space-separated string)
     #keep only non reserved words, but at least one
     for key in commands:
         for subkey in commands[key]:
             commands[key][subkey] = set(commands[key][subkey].split())
+            size = len(commands[key][subkey])
             Core.removefromlist(commands[key][subkey], reservedwords)
+            if (len(commands[key][subkey]) != size):
+                if (subkey == "words"):
+                    errmsg += "- des mots réservés ont été supprimés pour la commande "+key+"\n"
+                else:
+                    errmsg += "- des mots réservés ont été supprimés pour le paramètre "+subkey+" dans la commande "+key+"\n"
             if (len(commands[key][subkey]) == 0):
                 if (subkey == "words"):
                     commands[key][subkey].add(key)
+                    errmsg += "- aucun mot pour la commande "+key+"\n"
                 else:
                     commands[key][subkey].add(subkey)
+                    errmsg += "- paramètre manquant dans la commande "+key+": "+subkey+"\n"
     #
     #use some standard words to exit prompt
     exitwords_reserved = ("quit", "exit")
@@ -48,6 +62,9 @@ def Main():
         if (not exit_word in commands["exit"]["words"]):
             commands["exit"]["words"].add(exit_word)
     #
+    if (len(errmsg) > 0):
+        printf("Problème(s) lors de la lecture du fichier words.ini:")
+        printf(errmsg)
     playername = ""
     if (len(sys.argv) >= 2):
         playername = sys.argv[1].strip().lower()
