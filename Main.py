@@ -111,9 +111,21 @@ def Main():
                         if (Str == ""):
                             continue
                         Strlist = Str.split(" ")
-                        if (Core.oneIn(commands["target"]["removeall"], Strlist)):
+                        if ("help" in Strlist):
+                            printf("Vous êtes dans le mode d'édition des objectifs.")
+                            printf("Dans ce mode, les commandes disponibles sont les suivantes:")
+                            printf("- afficher ce message (tapez \"help\")")
+                            printf("- revenir au mode d'exploration: tapez l'un des mots suivants: "+printwords(commands["exit"]["words"]))
+                            printf('- tapez "x y" pour marquer le secteur aux coordonnées (x, y) comme objectif.')
+                            printf('- tapez "zone x1 y1 x2 y2" pour marquer comme objectif chaque secteur situé dans le rectangle décrit par les coordonnées (x1, y1) et (x2, y2).')
+                            printf("- entrez le nom d'une planète pour marquer chacun de ses secteurs comme objectif.")
+                            printf('- liste des planètes: '+printwords(planet_names))
+                            printf('- dans les commandes précédentes, l\'option "d" a pour effet de supprimer un/des secteur(s) de la liste des objectifs.')
+                            printf("- vider la liste des objectifs, tapez l'un des mots suivants: "+printwords(commands["target"]["removeall"]))
+                            printf("- retirer tout secteur exploré de la liste des objectifs, tapez l'un des mots suivants: "+printwords(commands["target"]["delallexplored"]))
+                        elif (Core.oneIn(commands["target"]["removeall"], Strlist)):
                             Data.cleartargets(playerdata)
-                        if (Core.oneIn(commands["target"]["delallexplored"], Strlist)):
+                        elif (Core.oneIn(commands["target"]["delallexplored"], Strlist)):
                             Data.cleantargets(playerdata)
                         elif (Core.oneIn(commands["exit"]["words"], Strlist)):
                             pass #nothing to do
@@ -133,8 +145,8 @@ def Main():
                         Strlist = Str.split(" ")
                         if ("help" in Strlist):
                             printf("Vous êtes dans le mode d'édition de la terre.")
-                            printf("Dans ce mode, seules trois commandes sont disponibles:")
-                            printf("- afficher un descriptif du mode d'édition de la terre (\"help\")")
+                            printf("Dans ce mode, les commandes disponibles sont les suivantes:")
+                            printf("- afficher ce message (tapez \"help\")")
                             printf("- revenir au mode d'exploration: tapez l'un des mots suivants: "+printwords(commands["exit"]["words"]))
                             printf("- indiquer l'emplacement de la terre: tapez \"x y\" en remplaçant x et y par les coordonnées indiquées par la carte PID")
                         elif (Core.oneIn(commands["exit"]["words"], Strlist)):
@@ -206,7 +218,7 @@ def parsecoords(Str, Strlist, planet_names, planets):
                 missing = 2-len(Strlist)
                 if (missing < 0):
                     printf("Il y a "+str(-missing)+" argument(s) en trop.")
-                else:
+                elif missing != 1:
                     printf("Il manque "+str(missing)+" argument(s).")
                 return []
             (x, y) = Strlist
@@ -239,9 +251,9 @@ def print_help(Strlist, commands, planet_names, playername):
         printf('Tapez "zone x1 y1 x2 y2" pour marquer comme exploré chaque secteur situé dans le rectangle décrit par les coordonnées (x1, y1) et (x2, y2).')
         printf("Entrez le nom d'une planète pour marquer chacun de ses secteurs comme exploré.")
         printf('Liste des planètes: '+printwords(planet_names))
-        printf('Dans les commandes précédentes, l\'option "d" a pour effet de marquer comme non exploré un secteur exploré.')
+        printf('Dans les commandes précédentes, l\'option "d" a pour effet de supprimer un/des secteur(s) de la liste des explorations.')
         printf("Pour quitter ce script, entrez l'un des mots suivants: "+printwords(commands["exit"]["words"]))
-        printf('Pour les autres commandes, tapez "help commandname" pour obtenir des informations supplémentaires.')
+        printf('Pour obtenir plus d\'informations à propos des autres commandes, tapez "help commandname".')
         printf('Valeurs possibles de "commandname" pour générer la carte: '+printwords(commands["map"]["words"]))
         printf('Valeurs possibles de "commandname" pour sauvegarder les données: '+printwords(commands["save"]["words"]))
         printf('Valeurs possibles de "commandname" pour modifier les objectifs: '+printwords(commands["target"]["words"]))
@@ -275,11 +287,21 @@ def print_help(Strlist, commands, planet_names, playername):
             printf(" "+str(playername)+".infos.ini: regroupe diverses informations sous forme d'un fichier ini")
             printf("--> La position de la terre (si elle est connue), notée x y")
         elif (Core.oneIn(commands["target"]["words"], Strlist)):
-            printf("Coming soon")
+            printf("Passe en mode d'édition des objectifs.")
+            printf("Dans ce mode, les commandes disponibles sont les suivantes:")
+            printf("- afficher un descriptif du mode d'édition des objectifs (tapez \"help\")")
+            printf("- quitter ce mode: tapez l'un des mots suivants: "+printwords(commands["exit"]["words"]))
+            printf('- tapez "x y" pour marquer le secteur aux coordonnées (x, y) comme objectif.')
+            printf('- tapez "zone x1 y1 x2 y2" pour marquer comme objectif chaque secteur situé dans le rectangle décrit par les coordonnées (x1, y1) et (x2, y2).')
+            printf("- entrez le nom d'une planète pour marquer chacun de ses secteurs comme objectif.")
+            printf('- liste des planètes: '+printwords(planet_names))
+            printf('- dans les commandes précédentes, l\'option "d" a pour effet de supprimer un/des secteur(s) de la liste des objectifs.')
+            printf("- vider la liste des objectifs, tapez l'un des mots suivants: "+printwords(commands["target"]["removeall"]))
+            printf("- retirer tout secteur exploré de la liste des objectifs, tapez l'un des mots suivants: "+printwords(commands["target"]["delallexplored"]))
         elif (Core.oneIn(commands["set-terre"]["words"], Strlist)):
             printf("Passe en mode d'édition de la terre.")
-            printf("Dans ce mode, seules trois commandes sont disponibles:")
-            printf("- afficher ce message")
+            printf("Dans ce mode, les commandes disponibles sont les suivantes:")
+            printf("- afficher un descriptif du mode d'édition de la terre (tapez \"help\")")
             printf("- quitter ce mode: tapez l'un des mots suivants: "+printwords(commands["exit"]["words"]))
             printf("- indiquer l'emplacement de la terre: tapez \"x y\" en remplaçant x et y par les coordonnées indiquées par la carte PID")
         else:
