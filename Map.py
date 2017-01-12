@@ -128,7 +128,7 @@ def getcolorsconfig(requiredkeys):
         for key in defaultcolors:
             if (key in newsections["background"]):
                 defaultcolors[key] = newsections["background"][key]
-    for key in requiredkeys+["background"]:
+    for key in list(requiredkeys)+["background"]:
         if (key not in newsections):
             newsections[key] = defaultcolors
             printf("Attention: "+str(key)+": section manquante")
